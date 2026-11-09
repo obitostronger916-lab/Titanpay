@@ -1,0 +1,64 @@
+databases:
+  - name: titan-db
+    databaseName: titan
+    plan: basic-256mb
+
+services:
+  - type: web
+    name: titan-donat-web
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt && cd frontend && npm install && npm run build
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: titan-db
+          property: connectionString
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_ID
+        sync: false
+      - key: WEBAPP_URL
+        sync: false
+      - key: PAYMENT_PROVIDER
+        value: none
+      - key: PAYMENT_WEBHOOK_SECRET
+        sync: false
+      - key: ONESTATE_API_URL
+        sync: false
+      - key: ONESTATE_API_KEY
+        sync: false
+      - key: PAYMENT_TTL_MINUTES
+        value: "20"
+
+  - type: worker
+    name: titan-donat-bot
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m bot.main
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: DATABASE_URL
+        fromDatabase:
+          name: titan-db
+          property: connectionString
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_ID
+        sync: false
+      - key: WEBAPP_URL
+        sync: false
+      - key: ONESTATE_API_URL
+        sync: false
+      - key: ONESTATE_API_KEY
+        sync: false
