@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     ONESTATE_API_KEY: str = ""
     PAYMENT_TTL_MINUTES: int = 20
     INITDATA_MAX_AGE: int = 86400
+    RUN_BOT: bool = False  # True bo'lsa bot web servis ichida ishlaydi
 
     @property
     def async_db_url(self) -> str:
