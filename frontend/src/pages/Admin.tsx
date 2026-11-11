@@ -1,17 +1,40 @@
+
 import { useEffect, useState } from "react";
 import { api, fmt, STATUS_UZ } from "../api";
 
-const TABS = ["Statistika", "To'lovlar", "Buyurtmalar", "Mahsulotlar", "Foydalanuvchilar", "Support", "Audit"];
+const TABS = [
+  "Statistika",
+  "To'lovlar",
+  "Buyurtmalar",
+  "Mahsulotlar",
+  "Foydalanuvchilar",
+  "Support",
+  "Audit",
+];
 
 export default function Admin() {
   const [tab, setTab] = useState(TABS[0]);
+
   return (
     <>
-      <div className="tabs">
+      <div style={{ marginBottom: 18 }}>
+        <div className="muted">ONESTATE ROLEPLAY</div>
+        <h2 style={{ margin: "5px 0" }}>Admin panel</h2>
+        <div className="muted">TITAN DONAT boshqaruv markazi</div>
+      </div>
+
+      <div className="tabs" style={{ marginBottom: 18 }}>
         {TABS.map((t) => (
-          <button key={t} className={`chip ${t === tab ? "on" : ""}`} onClick={() => setTab(t)}>{t}</button>
+          <button
+            key={t}
+            className={`chip ${t === tab ? "on" : ""}`}
+            onClick={() => setTab(t)}
+          >
+            {t}
+          </button>
         ))}
       </div>
+
       {tab === TABS[0] && <Stats />}
       {tab === TABS[1] && <Payments />}
       {tab === TABS[2] && <Orders />}
@@ -26,144 +49,562 @@ export default function Admin() {
 function useLoad(path: string) {
   const [data, setData] = useState<any>(null);
   const [err, setErr] = useState("");
-  const load = () => api(path).then(setData).catch((e) => setErr(e.message));
-  useEffect(() => { load(); }, [path]);
-  return { data, err, load };
+  const [loading, setLoading] = useState(true);
+
+  const load = () => {
+    setLoading(true);
+    setErr("");
+
+    return api(path)
+      .then(setData)
+      .catch((e) => setErr(e?.message || "Ma'lumot yuklanmadi."))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    load();
+  }, [path]);
+
+  return { data, err, loading, load };
+}
+
+function ErrorView({ message }: { message: string }) {
+  return (
+    <div className="card">
+      <div className="err">{message}</div>
+      <p className="muted">Ma'lumotni qayta yuklab ko'ring.</p>
+    </div>
+  );
+}
+
+function LoadingView() {
+  return <div className="card muted">Ma'lumotlar yuklanmoqda...</div>;
 }
 
 async function act(fn: () => Promise<any>, after: () => void) {
-  try { await fn(); after(); } catch (e: any) { alert(e.message); }
+  try {
+    await fn();
+    after();
+  } catch (e: any) {
+    alert(e?.message || "Amal bajarilmadi.");
+  }
 }
 
 function Stats() {
-  const { data, err } = useLoad("/api/admin/stats");
-  if (err) return <div className="err">{err}</div>;
-  if (!data) return <div className="muted">Yuklanmoqda…</div>;
-  const rows: [string, any][] = [
-    ["Foydalanuvchilar", data.users],
-    ["Jami to'ldirilgan", fmt(data.topups_total)],
-    ["Navbatdagi buyurtmalar", data.orders_queued],
-    ["Yetkazilgan buyurtmalar", data.orders_delivered],
-    ["Tekshiruvdagi to'lovlar", data.payments_review],
-    ["Ochiq murojaatlar", data.tickets_open],
+  const { data, err, loading, load } = useLoad("/api/admin/stats");
+
+  if (loading) return <LoadingView />;
+  if (err) return <ErrorView message={err} />;
+  if (!data) return null;
+
+  const rows: [string, any, string][] = [
+    ["Foydalanuvchilar", data.users, "👥"],
+    ["Jami to'ldirilgan", fmt(data.topups_total), "💳"],
+    ["Navbatdagi buyurtmalar", data.orders_queued, "📦"],
+    ["Yetkazilgan buyurtmalar", data.orders_delivered, "✅"],
+    ["Tekshiruvdagi to'lovlar", data.payments_review, "🔎"],
+    ["Ochiq murojaatlar", data.tickets_open, "💬"],
   ];
-  return <>{rows.map(([k, v]) => <div className="card row" key={k}><span className="muted">{k}</span><b className="price">{v}</b></div>)}</>;
+
+  return (
+    <>
+      <div className="row" style={{ marginBottom: 12 }}>
+        <h3 style={{ margin: 0 }}>Umumiy statistika</h3>
+        <button className="chip" onClick={load}>Yangilash ↻</button>
+      </div>
+
+      {rows.map(([name, value, icon]) => (
+        <div className="card row" key={name}>
+          <div className="row" style={{ gap: 12 }}>
+            <span style={{ fontSize: 24 }}>{icon}</span>
+            <span className="muted">{name}</span>
+          </div>
+          <b className="price">{value ?? 0}</b>
+        </div>
+      ))}
+    </>
+  );
 }
 
 function Payments() {
   const [filter, setFilter] = useState("mismatch");
-  const { data, load } = useLoad(`/api/admin/payments?status=${filter}`);
+  const { data, err, loading, load } = useLoad(
+    `/api/admin/payments?status=${filter}`
+  );
+
   return (
     <>
+      <h3>To'lovlarni boshqarish</h3>
+
       <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-        {["mismatch", "created", "credited", "mismatch_credited", "rejected"].map((s) => <option key={s} value={s}>{STATUS_UZ[s] || s}</option>)}
+        {[
+          "mismatch",
+          "created",
+          "credited",
+          "mismatch_credited",
+          "rejected",
+        ].map((s) => (
+          <option key={s} value={s}>
+            {STATUS_UZ[s] || s}
+          </option>
+        ))}
       </select>
-      {(data || []).map((p: any) => (
-        <div className="card" key={p.id}>
-          <div className="row"><b>#{p.id}</b><span className="badge">{STATUS_UZ[p.status] || p.status}</span></div>
-          <div className="muted">User {p.user_id} · kutilgan {fmt(p.expected)} · to'langan {p.paid != null ? fmt(p.paid) : "-"}</div>
-          <div className="muted">TX: {p.tx || "-"}</div>
-          {p.status === "mismatch" && (
-            <div className="row" style={{ marginTop: 8 }}>
-              <button className="btn small" onClick={() => confirm(`To'langan ${fmt(p.paid)} balansga qo'shilsinmi?`) && act(() => api(`/api/admin/payments/${p.id}/credit`, "POST"), load)}>Balansga qo'shish</button>
-              <button className="btn red small" onClick={() => confirm("Rad etilsinmi?") && act(() => api(`/api/admin/payments/${p.id}/reject`, "POST"), load)}>Rad etish</button>
+
+      {loading && <LoadingView />}
+      {err && <ErrorView message={err} />}
+
+      {!loading &&
+        !err &&
+        (data || []).map((p: any) => (
+          <div className="card" key={p.id}>
+            <div className="row">
+              <b>TO'LOV #{p.id}</b>
+              <span className="badge">
+                {STATUS_UZ[p.status] || p.status}
+              </span>
             </div>
-          )}
-        </div>
-      ))}
+
+            <div className="muted" style={{ marginTop: 12 }}>
+              Foydalanuvchi: {p.user_id}
+            </div>
+
+            <div className="row" style={{ marginTop: 8 }}>
+              <span className="muted">Kutilgan summa</span>
+              <b>{fmt(p.expected)}</b>
+            </div>
+
+            <div className="row" style={{ marginTop: 8 }}>
+              <span className="muted">To'langan summa</span>
+              <b className="price">
+                {p.paid != null ? fmt(p.paid) : "-"}
+              </b>
+            </div>
+
+            <div className="muted" style={{ marginTop: 8 }}>
+              Tranzaksiya: {p.tx || "-"}
+            </div>
+
+            {p.status === "mismatch" && (
+              <div className="row" style={{ marginTop: 14 }}>
+                <button
+                  className="btn small"
+                  onClick={() =>
+                    confirm(
+                      `To'langan ${fmt(p.paid)} balansga qo'shilsinmi?`
+                    ) &&
+                    act(
+                      () =>
+                        api(
+                          `/api/admin/payments/${p.id}/credit`,
+                          "POST"
+                        ),
+                      load
+                    )
+                  }
+                >
+                  Balansga qo'shish
+                </button>
+
+                <button
+                  className="btn red small"
+                  onClick={() =>
+                    confirm("To'lov rad etilsinmi?") &&
+                    act(
+                      () =>
+                        api(
+                          `/api/admin/payments/${p.id}/reject`,
+                          "POST"
+                        ),
+                      load
+                    )
+                  }
+                >
+                  Rad etish
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+
+      {!loading && !err && (data || []).length === 0 && (
+        <div className="card muted">To'lovlar topilmadi.</div>
+      )}
     </>
   );
 }
 
 function Orders() {
   const [filter, setFilter] = useState("queued");
-  const { data, load } = useLoad(`/api/admin/orders?status=${filter}`);
+  const { data, err, loading, load } = useLoad(
+    `/api/admin/orders?status=${filter}`
+  );
+
   return (
     <>
+      <h3>Buyurtmalar</h3>
+
       <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-        {["queued", "processing", "delivered", "error"].map((s) => <option key={s} value={s}>{STATUS_UZ[s]}</option>)}
+        {["queued", "processing", "delivered", "error"].map((s) => (
+          <option key={s} value={s}>
+            {STATUS_UZ[s] || s}
+          </option>
+        ))}
       </select>
-      {(data || []).map((o: any) => (
-        <div className="card" key={o.id}>
-          <div className="row"><b>#{o.id}</b><span className="badge">{STATUS_UZ[o.status] || o.status}</span></div>
-          <div>{o.product} · {fmt(o.price)}</div>
-          <div className="muted">User {o.user_id} · nik: {o.nick}</div>
-          {o.result && <div className="muted">{o.result}</div>}
-          {o.status !== "delivered" && o.status !== "error" && (
-            <div className="row" style={{ marginTop: 8 }}>
-              <button className="btn ghost small" onClick={() => act(() => api(`/api/admin/orders/${o.id}/requeue`, "POST"), load)}>Qayta navbatga</button>
-              <button className="btn red small" onClick={() => confirm("Pul balansga qaytarilsinmi?") && act(() => api(`/api/admin/orders/${o.id}/refund`, "POST"), load)}>Qaytarish</button>
+
+      {loading && <LoadingView />}
+      {err && <ErrorView message={err} />}
+
+      {!loading &&
+        !err &&
+        (data || []).map((o: any) => (
+          <div className="card" key={o.id}>
+            <div className="row">
+              <b>BUYURTMA #{o.id}</b>
+              <span className="badge">
+                {STATUS_UZ[o.status] || o.status}
+              </span>
             </div>
-          )}
-        </div>
-      ))}
+
+            <h3 style={{ marginBottom: 5 }}>{o.product}</h3>
+            <b className="price">{fmt(o.price)}</b>
+
+            <div className="muted" style={{ marginTop: 10 }}>
+              User: {o.user_id}
+            </div>
+            <div className="muted">O'yin nik: {o.nick}</div>
+
+            {o.result && (
+              <div className="card" style={{ marginTop: 10 }}>
+                {o.result}
+              </div>
+            )}
+
+            {o.status !== "delivered" && o.status !== "error" && (
+              <div className="row" style={{ marginTop: 14 }}>
+                <button
+                  className="btn ghost small"
+                  onClick={() =>
+                    act(
+                      () =>
+                        api(
+                          `/api/admin/orders/${o.id}/requeue`,
+                          "POST"
+                        ),
+                      load
+                    )
+                  }
+                >
+                  Qayta navbatga
+                </button>
+
+                <button
+                  className="btn red small"
+                  onClick={() =>
+                    confirm("Pul foydalanuvchi balansiga qaytarilsinmi?") &&
+                    act(
+                      () =>
+                        api(
+                          `/api/admin/orders/${o.id}/refund`,
+                          "POST"
+                        ),
+                      load
+                    )
+                  }
+                >
+                  Pulni qaytarish
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+
+      {!loading && !err && (data || []).length === 0 && (
+        <div className="card muted">Buyurtmalar topilmadi.</div>
+      )}
     </>
   );
 }
 
-const EMPTY = { name: "", description: "", price: "", image_url: "", category: "Umumiy", in_stock: true, delivery_payload: "" };
+const EMPTY = {
+  name: "",
+  description: "",
+  price: "",
+  image_url: "",
+  category: "Umumiy",
+  in_stock: true,
+  delivery_payload: "",
+};
 
 function Products() {
-  const { data, load } = useLoad("/api/admin/products");
+  const { data, err, loading, load } = useLoad("/api/admin/products");
   const [form, setForm] = useState<any>(EMPTY);
   const [editId, setEditId] = useState<number | null>(null);
-  const set = (k: string, v: any) => setForm({ ...form, [k]: v });
+
+  const set = (k: string, v: any) =>
+    setForm((old: any) => ({ ...old, [k]: v }));
+
+  function reset() {
+    setForm({ ...EMPTY });
+    setEditId(null);
+  }
 
   function save() {
-    const body = { ...form, price: parseInt(form.price, 10), image_url: form.image_url || null, delivery_payload: form.delivery_payload || null };
-    act(() => (editId ? api(`/api/admin/products/${editId}`, "PUT", body) : api("/api/admin/products", "POST", body)),
-      () => { setForm(EMPTY); setEditId(null); load(); });
+    const price = parseInt(form.price, 10);
+
+    if (!form.name.trim() || !Number.isSafeInteger(price) || price <= 0) {
+      return;
+    }
+
+    const body = {
+      ...form,
+      name: form.name.trim(),
+      price,
+      image_url: form.image_url || null,
+      delivery_payload: form.delivery_payload || null,
+    };
+
+    act(
+      () =>
+        editId
+          ? api(`/api/admin/products/${editId}`, "PUT", body)
+          : api("/api/admin/products", "POST", body),
+      () => {
+        reset();
+        load();
+      }
+    );
   }
 
   return (
     <>
       <div className="card">
-        <h3>{editId ? `Tahrirlash #${editId}` : "Yangi mahsulot"}</h3>
-        <input placeholder="Nomi" value={form.name} onChange={(e) => set("name", e.target.value)} />
-        <textarea rows={2} placeholder="Tavsifi" value={form.description} onChange={(e) => set("description", e.target.value)} />
-        <input type="number" placeholder="Narxi (UZS)" value={form.price} onChange={(e) => set("price", e.target.value)} />
-        <input placeholder="Rasm URL (https://...)" value={form.image_url || ""} onChange={(e) => set("image_url", e.target.value)} />
-        <input placeholder="Kategoriya" value={form.category} onChange={(e) => set("category", e.target.value)} />
-        <input placeholder="Yetkazish ma'lumoti (API'ga yuboriladi: kod/miqdor)" value={form.delivery_payload || ""} onChange={(e) => set("delivery_payload", e.target.value)} />
-        <label className="row" style={{ marginBottom: 10 }}>
-          <span>Mavjud</span>
-          <input type="checkbox" style={{ width: 24, margin: 0 }} checked={form.in_stock} onChange={(e) => set("in_stock", e.target.checked)} />
-        </label>
-        <button className="btn" disabled={!form.name || !(parseInt(form.price, 10) > 0)} onClick={save}>Saqlash</button>
-        {editId && <button className="btn ghost" style={{ marginTop: 8 }} onClick={() => { setForm(EMPTY); setEditId(null); }}>Bekor qilish</button>}
-      </div>
-      {(data || []).map((p: any) => (
-        <div className="card" key={p.id} onClick={() => { setEditId(p.id); setForm({ ...p, price: String(p.price) }); window.scrollTo(0, 0); }}>
-          <div className="row"><b>{p.name}</b><span className="price">{fmt(p.price)}</span></div>
-          <div className="muted">{p.category} · {p.in_stock ? "mavjud" : "mavjud emas"}</div>
+        <div className="row">
+          <h3 style={{ margin: 0 }}>
+            {editId ? `Mahsulot #${editId}` : "Yangi mahsulot"}
+          </h3>
+          <span className="badge">UZS</span>
         </div>
-      ))}
+
+        <input
+          placeholder="Mahsulot nomi"
+          value={form.name}
+          onChange={(e) => set("name", e.target.value)}
+        />
+
+        <textarea
+          rows={3}
+          placeholder="Mahsulot tavsifi"
+          value={form.description}
+          onChange={(e) => set("description", e.target.value)}
+        />
+
+        <input
+          type="number"
+          min="1"
+          placeholder="Narxi (UZS)"
+          value={form.price}
+          onChange={(e) => set("price", e.target.value)}
+        />
+
+        <input
+          placeholder="Rasm URL (https://...)"
+          value={form.image_url || ""}
+          onChange={(e) => set("image_url", e.target.value)}
+        />
+
+        <input
+          placeholder="Kategoriya"
+          value={form.category}
+          onChange={(e) => set("category", e.target.value)}
+        />
+
+        <input
+          placeholder="Yetkazish ma'lumoti (API)"
+          value={form.delivery_payload || ""}
+          onChange={(e) => set("delivery_payload", e.target.value)}
+        />
+
+        <label className="row" style={{ margin: "12px 0" }}>
+          <span>Mahsulot mavjud</span>
+          <input
+            type="checkbox"
+            style={{ width: 24, margin: 0 }}
+            checked={form.in_stock}
+            onChange={(e) => set("in_stock", e.target.checked)}
+          />
+        </label>
+
+        <button
+          className="btn"
+          disabled={
+            !form.name.trim() ||
+            !Number.isSafeInteger(Number(form.price)) ||
+            Number(form.price) <= 0
+          }
+          onClick={save}
+        >
+          {editId ? "O'zgarishlarni saqlash" : "Mahsulot qo'shish"}
+        </button>
+
+        {editId && (
+          <button
+            className="btn ghost"
+            style={{ marginTop: 8 }}
+            onClick={reset}
+          >
+            Bekor qilish
+          </button>
+        )}
+      </div>
+
+      <h3>Mahsulotlar ro'yxati</h3>
+
+      {loading && <LoadingView />}
+      {err && <ErrorView message={err} />}
+
+      {!loading &&
+        !err &&
+        (data || []).map((p: any) => (
+          <button
+            type="button"
+            className="card"
+            key={p.id}
+            style={{
+              width: "100%",
+              color: "inherit",
+              textAlign: "left",
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              setEditId(p.id);
+              setForm({
+                ...p,
+                price: String(p.price),
+              });
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          >
+            <div className="row">
+              <b>{p.name}</b>
+              <span className="price">{fmt(p.price)}</span>
+            </div>
+            <div className="muted">
+              {p.category} · {p.in_stock ? "Mavjud" : "Mavjud emas"}
+            </div>
+            <div className="muted" style={{ marginTop: 6 }}>
+              Tahrirlash uchun bosing
+            </div>
+          </button>
+        ))}
     </>
   );
 }
 
 function Users() {
-  const { data, load } = useLoad("/api/admin/users");
+  const { data, err, loading, load } = useLoad("/api/admin/users");
   const [sel, setSel] = useState<any>(null);
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
+
+  function updateBalance() {
+    const value = parseInt(amount, 10);
+
+    if (!Number.isSafeInteger(value) || value === 0 || note.trim().length < 3) {
+      return;
+    }
+
+    act(
+      () =>
+        api("/api/admin/balance", "POST", {
+          user_id: sel.id,
+          amount: value,
+          note: note.trim(),
+        }),
+      () => {
+        setSel(null);
+        setAmount("");
+        setNote("");
+        load();
+      }
+    );
+  }
+
   return (
     <>
-      {(data || []).map((u: any) => (
-        <div className="card" key={u.id} onClick={() => setSel(u)}>
-          <div className="row"><b>{u.username ? `@${u.username}` : u.id}</b><span className="price">{fmt(u.balance)}</span></div>
-          <div className="muted">ID {u.id}{u.banned ? " · bloklangan" : ""}</div>
-        </div>
-      ))}
+      <h3>Foydalanuvchilar</h3>
+
+      {loading && <LoadingView />}
+      {err && <ErrorView message={err} />}
+
+      {!loading &&
+        !err &&
+        (data || []).map((u: any) => (
+          <button
+            type="button"
+            className="card"
+            key={u.id}
+            style={{
+              width: "100%",
+              color: "inherit",
+              textAlign: "left",
+              cursor: "pointer",
+            }}
+            onClick={() => setSel(u)}
+          >
+            <div className="row">
+              <b>{u.username ? `@${u.username}` : u.id}</b>
+              <span className="price">{fmt(u.balance)}</span>
+            </div>
+            <div className="muted">
+              ID: {u.id}
+              {u.banned ? " · Bloklangan" : ""}
+            </div>
+            <div className="muted" style={{ marginTop: 5 }}>
+              Balansni boshqarish uchun bosing
+            </div>
+          </button>
+        ))}
+
       {sel && (
         <div className="modal" onClick={() => setSel(null)}>
           <div className="sheet" onClick={(e) => e.stopPropagation()}>
-            <h3 className="gold">Balans: {sel.id}</h3>
-            <input type="number" placeholder="Summa (+ qo'shish, - ayirish)" value={amount} onChange={(e) => setAmount(e.target.value)} />
-            <input placeholder="Sabab (majburiy)" value={note} onChange={(e) => setNote(e.target.value)} />
-            <button className="btn" disabled={!parseInt(amount, 10) || note.trim().length < 3}
-              onClick={() => act(() => api("/api/admin/balance", "POST", { user_id: sel.id, amount: parseInt(amount, 10), note }),
-                () => { setSel(null); setAmount(""); setNote(""); load(); })}>Bajarish</button>
+            <div className="row">
+              <h3 style={{ margin: 0 }}>Balans boshqaruvi</h3>
+              <button className="chip" onClick={() => setSel(null)}>
+                ✕
+              </button>
+            </div>
+
+            <div className="muted" style={{ marginTop: 12 }}>
+              Foydalanuvchi ID: {sel.id}
+            </div>
+
+            <h2 className="price">{fmt(sel.balance)}</h2>
+
+            <input
+              type="number"
+              placeholder="Summa (+ qo'shish, - ayirish)"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+
+            <input
+              placeholder="Sabab (majburiy)"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
+
+            <button
+              className="btn"
+              disabled={
+                !Number.isSafeInteger(Number(amount)) ||
+                Number(amount) === 0 ||
+                note.trim().length < 3
+              }
+              onClick={updateBalance}
+            >
+              Balansni o'zgartirish
+            </button>
           </div>
         </div>
       )}
@@ -172,34 +613,116 @@ function Users() {
 }
 
 function Tickets() {
-  const { data, load } = useLoad("/api/admin/tickets");
+  const { data, err, loading, load } = useLoad("/api/admin/tickets");
   const [reply, setReply] = useState<Record<string, string>>({});
+
   return (
     <>
-      {(data || []).map((t: any) => (
-        <div className="card" key={t.id}>
-          <div className="row"><b>#{t.id}</b><span className="badge">{STATUS_UZ[t.status] || t.status}</span></div>
-          <div className="muted">User {t.user_id} · to'lov: {t.payment_id || "-"} · buyurtma: {t.order_id || "-"}</div>
-          {t.messages.map((m: any, i: number) => <div key={i} className={`msg ${m.admin ? "admin" : ""}`}>{m.admin ? "🛡 " : ""}{m.text}</div>)}
-          <input placeholder="Javob" value={reply[t.id] || ""} onChange={(e) => setReply({ ...reply, [t.id]: e.target.value })} />
-          <button className="btn small" disabled={!(reply[t.id] || "").trim()}
-            onClick={() => act(() => api(`/api/admin/tickets/${t.id}/reply`, "POST", { text: reply[t.id] }), () => { setReply({ ...reply, [t.id]: "" }); load(); })}>Javob berish</button>
-        </div>
-      ))}
+      <h3>Support murojaatlari</h3>
+
+      {loading && <LoadingView />}
+      {err && <ErrorView message={err} />}
+
+      {!loading &&
+        !err &&
+        (data || []).map((t: any) => (
+          <div className="card" key={t.id}>
+            <div className="row">
+              <b>MUROJAAT #{t.id}</b>
+              <span className="badge">
+                {STATUS_UZ[t.status] || t.status}
+              </span>
+            </div>
+
+            <div className="muted" style={{ marginTop: 10 }}>
+              User: {t.user_id}
+            </div>
+            <div className="muted">
+              To'lov: {t.payment_id || "-"} · Buyurtma: {t.order_id || "-"}
+            </div>
+
+            <div style={{ display: "grid", gap: 9, marginTop: 12 }}>
+              {(t.messages || []).map((m: any, i: number) => (
+                <div
+                  key={i}
+                  className={`msg ${m.admin ? "admin" : ""}`}
+                >
+                  <div className="muted" style={{ fontSize: 11 }}>
+                    {m.admin ? "🛡️ ADMIN" : "FOYDALANUVCHI"}
+                  </div>
+                  {m.text}
+                </div>
+              ))}
+            </div>
+
+            <input
+              placeholder="Javob yozing..."
+              value={reply[t.id] || ""}
+              onChange={(e) =>
+                setReply((old) => ({
+                  ...old,
+                  [t.id]: e.target.value,
+                }))
+              }
+            />
+
+            <button
+              className="btn small"
+              style={{ marginTop: 8 }}
+              disabled={!(reply[t.id] || "").trim()}
+              onClick={() =>
+                act(
+                  () =>
+                    api(`/api/admin/tickets/${t.id}/reply`, "POST", {
+                      text: reply[t.id].trim(),
+                    }),
+                  () => {
+                    setReply((old) => ({ ...old, [t.id]: "" }));
+                    load();
+                  }
+                )
+              }
+            >
+              Javob yuborish
+            </button>
+          </div>
+        ))}
+
+      {!loading && !err && (data || []).length === 0 && (
+        <div className="card muted">Murojaatlar mavjud emas.</div>
+      )}
     </>
   );
 }
 
 function Audit() {
-  const { data } = useLoad("/api/admin/audit");
+  const { data, err, loading, load } = useLoad("/api/admin/audit");
+
   return (
     <>
-      {(data || []).map((a: any, i: number) => (
-        <div className="card" key={i}>
-          <div className="row"><b>{a.action}</b><span className="muted">{new Date(a.at).toLocaleString()}</span></div>
-          <div className="muted">{a.details}</div>
-        </div>
-      ))}
+      <div className="row">
+        <h3>Amallar tarixi</h3>
+        <button className="chip" onClick={load}>Yangilash ↻</button>
+      </div>
+
+      {loading && <LoadingView />}
+      {err && <ErrorView message={err} />}
+
+      {!loading &&
+        !err &&
+        (data || []).map((a: any, i: number) => (
+          <div className="card" key={i}>
+            <b>{a.action}</b>
+            <div className="muted" style={{ marginTop: 7 }}>
+              {a.at ? new Date(a.at).toLocaleString() : ""}
+            </div>
+            <div style={{ marginTop: 8 }}>{a.details}</div>
+          </div>
+        ))}
+
+      {!loading && !err && (data || []).length === 0 && (
+        <div className="card muted">Audit yozuvlari mavjud emas.</div>
+      )}
     </>
   );
 }
