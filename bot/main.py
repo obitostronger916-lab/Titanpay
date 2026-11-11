@@ -13,7 +13,6 @@ from app.models import (LedgerEntry, Order, Payment, Ticket, TicketMessage)
 from app.services import ledger
 from app.services.delivery_worker import loop as delivery_loop
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("bot")
 
 dp = Dispatcher()
@@ -164,3 +163,43 @@ async def notify_loop(bot: Bot):
                                     f"to'langan {p.paid_amount}. Admin panelda tekshiring.")
             for mm in msgs:
                 uid = tickets.get(mm.ticket_id)
+                if uid:
+                    await safe_send(bot, uid, f"💬 Support javobi ({mm.ticket_id}):\n{mm.text}")
+            last_msg = last_msg_all
+        except Exception:
+            log.exception("notify loop xatosi")
+        await asyncio.sleep(10)
+
+
+async def run_bot():
+    """Botni ishga tushiradi. Web servis ichidan ham, alohida ham chaqirish mumkin."""
+    if not settings.BOT_TOKEN:
+        log.error("BOT_TOKEN sozlanmagan, bot ishga tushmadi")
+        return
+    bot = Bot(settings.BOT_TOKEN)
+
+    async def on_delivery(user_id: int, order_id: str, status: str):
+        if status == "delivered":
+            await safe_send(bot, user_id, f"🎉 Buyurtma #{order_id} yetkazildi!")
+        else:
+            await safe_send(bot, user_id, f"❌ Buyurtma #{order_id} bajarilmadi. Pul balansga qaytariladi.")
+
+    tasks = [asyncio.create_task(delivery_loop(on_delivery)),
+             asyncio.create_task(notify_loop(bot))]
+    try:
+        await bot.delete_webhook(drop_pending_updates=True)
+        log.info("Bot ishga tushdi")
+        await dp.start_polling(bot, handle_signals=False)
+    finally:
+        for t in tasks:
+            t.cancel()
+
+
+async def main():
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    await init_db()
+    await run_bot()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
