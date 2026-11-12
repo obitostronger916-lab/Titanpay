@@ -182,7 +182,9 @@ async def all_orders(status: str | None = None, s: AsyncSession = Depends(get_se
     if status:
         q = q.where(Order.status == status)
     return [{"id": o.id, "user_id": o.user_id, "product": o.product_name, "price": o.price,
-             "nick": o.game_nick, "client_id": o.client_id, "privacy_id": o.privacy_id,\n             "character_name": o.character_name or o.game_nick, "server": o.server_name,\n             "status": o.status, "result": o.delivery_result}
+             "nick": o.game_nick, "client_id": o.client_id, "privacy_id": o.privacy_id,
+             "character_name": o.character_name or o.game_nick, "server": o.server_name,
+             "status": o.status, "result": o.delivery_result}
             for o in (await s.execute(q)).scalars().all()]
 
 
