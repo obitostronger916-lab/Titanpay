@@ -68,6 +68,7 @@ export default function App() {
   }, [banners.length]);
 
   const activeBanner = banners.length ? banners[bannerIndex % banners.length] : null;
+  const changeBanner = (direction: number) => setBannerIndex((current) => (current + direction + banners.length) % banners.length);
 
   const openBanner = () => {
     if (activeBanner?.target_url) {
@@ -170,12 +171,17 @@ export default function App() {
                 <span className="promo-arrow">›</span>
               </button>
               {banners.length > 1 && (
-                <div className="promo-dots">
-                  {banners.map((banner, index) => (
-                    <button key={banner.id} aria-label={`Banner ${index + 1}`}
-                      className={index === bannerIndex ? "active" : ""}
-                      onClick={() => setBannerIndex(index)} />
-                  ))}
+                <div className="promo-controls" aria-label="Reklama bannerlari">
+                  <button className="promo-step" aria-label="Oldingi reklama" onClick={() => changeBanner(-1)}>‹</button>
+                  <div className="promo-dots">
+                    {banners.map((banner, index) => (
+                      <button key={banner.id} aria-label={`Banner ${index + 1}`}
+                        className={index === bannerIndex ? "active" : ""}
+                        onClick={() => setBannerIndex(index)} />
+                    ))}
+                  </div>
+                  <span className="promo-count">{(bannerIndex % banners.length) + 1}/{banners.length}</span>
+                  <button className="promo-step" aria-label="Keyingi reklama" onClick={() => changeBanner(1)}>›</button>
                 </div>
               )}
             </div>
