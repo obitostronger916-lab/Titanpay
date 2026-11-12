@@ -53,7 +53,7 @@ async def test_admin_endpoints_protected(client):
 
 async def test_purchase_and_isolation_between_users(client):
     await seed()
-    r = await client.post("/api/orders", json={"product_id": 1, "game_nick": "Nick_A"}, headers=h(555))
+    r = await client.post("/api/orders", json={"product_id": 1, "client_id": "12345", "privacy_id": "67890", "character_name": "Nick_A", "server": "LOMITA CIS"}, headers=h(555))
     assert r.status_code == 200 and r.json()["status"] == "queued"
     assert (await client.get("/api/me", headers=h(555))).json()["balance"] == 4000
     # boshqa foydalanuvchi bu buyurtmani ko'rmaydi
@@ -63,7 +63,7 @@ async def test_purchase_and_isolation_between_users(client):
 
 async def test_insufficient_balance_is_400(client):
     await seed(balance=1000)
-    r = await client.post("/api/orders", json={"product_id": 1, "game_nick": "Nick_A"}, headers=h(555))
+    r = await client.post("/api/orders", json={"product_id": 1, "client_id": "12345", "privacy_id": "67890", "character_name": "Nick_A", "server": "LOMITA CIS"}, headers=h(555))
     assert r.status_code == 400
     assert (await client.get("/api/me", headers=h(555))).json()["balance"] == 1000
 
@@ -76,7 +76,7 @@ async def test_topup_returns_503_without_provider(client):
 
 async def test_cannot_attach_ticket_to_foreign_order(client):
     await seed()
-    await client.post("/api/orders", json={"product_id": 1, "game_nick": "Nick_A"}, headers=h(555))
+    await client.post("/api/orders", json={"product_id": 1, "client_id": "12345", "privacy_id": "67890", "character_name": "Nick_A", "server": "LOMITA CIS"}, headers=h(555))
     orders = (await client.get("/api/orders", headers=h(555))).json()
     r = await client.post("/api/tickets", json={"text": "salom", "order_id": orders[0]["id"]}, headers=h(666))
     assert r.status_code == 404
