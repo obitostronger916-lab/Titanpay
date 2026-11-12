@@ -143,6 +143,7 @@ function Payments() {
       <select value={filter} onChange={(e) => setFilter(e.target.value)}>
         {[
           "mismatch",
+          "review",
           "created",
           "credited",
           "mismatch_credited",
@@ -188,7 +189,7 @@ function Payments() {
               Tranzaksiya: {p.tx || "-"}
             </div>
 
-            {p.status === "mismatch" && (
+            {["mismatch", "review"].includes(p.status) && (
               <div className="row" style={{ marginTop: 14 }}>
                 <button
                   className="btn small"
