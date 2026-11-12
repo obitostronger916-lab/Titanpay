@@ -10,13 +10,21 @@ export type Me = { id: number; name: string; balance: number; is_admin: boolean 
 export type Nav = (page: string, ctx?: any) => void;
 
 const TILES: [string, string, string][] = [
-  ["shop", "🛒", "Donat do'koni"],
-  ["balance", "💰", "Balans"],
-  ["topup", "➕", "Balansni to'ldirish"],
-  ["orders", "📦", "Buyurtmalar"],
+  ["shop", "🛒", "Donat do‘koni"],
+  ["balance", "💳", "Balans"],
+  ["topup", "➕", "Balansni to‘ldirish"],
+  ["orders", "🧾", "Buyurtmalar"],
   ["profile", "👤", "Profil"],
-  ["support", "🆘", "Support"],
-  ["rules", "📜", "Qoidalar"],
+  ["support", "🎧", "Yordam"],
+  ["rules", "📋", "Qoidalar"],
+];
+
+const BOTTOM_NAV: [string, string, string][] = [
+  ["home", "⌂", "Bosh sahifa"],
+  ["shop", "🎮", "O‘yinlar"],
+  ["orders", "◷", "Tarix"],
+  ["topup", "+", "To‘ldirish"],
+  ["profile", "☰", "Sozlamalar"],
 ];
 
 export default function App() {
@@ -24,12 +32,14 @@ export default function App() {
   const [error, setError] = useState("");
   const [page, setPage] = useState("home");
   const [ctx, setCtx] = useState<any>(null);
+  const [showSplash, setShowSplash] = useState(true);
 
   const refresh = useCallback(async () => {
     try {
       setMe(await api<Me>("/api/me"));
+      setError("");
     } catch (e: any) {
-      setError(e.message);
+      setError(e?.message || "Ma’lumotlarni yuklab bo‘lmadi");
     }
   }, []);
 
@@ -39,64 +49,167 @@ export default function App() {
     refresh();
   }, [refresh]);
 
-  const go: Nav = (p, c) => {
-    setPage(p);
-    setCtx(c ?? null);
-    window.scrollTo(0, 0);
+  useEffect(() => {
+    if (!me) return;
+    const timer = window.setTimeout(() => setShowSplash(false), 1900);
+    return () => window.clearTimeout(timer);
+  }, [me]);
+
+  const go: Nav = (nextPage, nextCtx) => {
+    setPage(nextPage);
+    setCtx(nextCtx ?? null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  if (error)
-    return (
-      <div className="wrap">
-        <h2 className="gold">TITAN DONAT</h2>
-        <p className="err">{error}</p>
-        <p className="muted">Mini App'ni Telegram bot ichidagi tugma orqali oching.</p>
-      </div>
-    );
-  if (!me) return <div className="wrap muted">Yuklanmoqda…</div>;
-
-  const titles: Record<string, string> = Object.fromEntries(TILES.map(([k, , t]) => [k, t]));
+  const titles: Record<string, string> = Object.fromEntries(
+    TILES.map(([key, , title]) => [key, title])
+  );
   titles.admin = "Admin panel";
 
+  if (error) {
+    return (
+      <div className="wrap error-screen">
+        <div className="brand-mark small-mark">T</div>
+        <h2 className="neon-text">TITANPAY</h2>
+        <p className="err">{error}</p>
+        <p className="muted">Mini App’ni Telegram bot ichidagi tugma orqali oching.</p>
+        <button className="primary-btn" onClick={refresh}>Qayta urinish</button>
+      </div>
+    );
+  }
+
+  if (!me) {
+    return (
+      <div className="loading-screen">
+        <div className="brand-mark loading-mark">T</div>
+        <div className="loading-line"><span /></div>
+        <p className="muted">TITANPAY yuklanmoqda…</p>
+      </div>
+    );
+  }
+
+  if (showSplash) {
+    return (
+      <div className="splash-screen">
+        <div className="splash-glow" />
+        <div className="logo-stage">
+          <div className="orbit orbit-one" />
+          <div className="orbit orbit-two" />
+          <div className="brand-mark splash-mark">T</div>
+          <span className="spark spark-one" />
+          <span className="spark spark-two" />
+          <span className="spark spark-three" />
+        </div>
+        <div className="splash-title">TITAN<span>PAY</span></div>
+        <div className="splash-subtitle">ONESTATE ROLEPLAY</div>
+        <div className="loading-line splash-loading"><span /></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="wrap">
-      {page === "home" ? (
-        <>
-          <h1 className="gold">👑 TITAN DONAT</h1>
-          <div className="muted" style={{ marginBottom: 10 }}>ONESTATE RP</div>
-          <div className="card balance-card">
-            <div className="muted">Salom, {me.name || "o'yinchi"}</div>
-            <div className="big gold">{fmt(me.balance)}</div>
-          </div>
-          <div className="grid">
-            {TILES.map(([k, ico, t]) => (
-              <button key={k} className="tile" onClick={() => go(k)}>
-                <span className="ico">{ico}</span>{t}
+    <div className="app-shell">
+      <main className="wrap app-content">
+        {page === "home" ? (
+          <>
+            <header className="home-header">
+              <div className="brand-lockup">
+                <div className="brand-mark header-mark">T</div>
+                <div>
+                  <div className="brand-name">TITAN<span>PAY</span></div>
+                  <div className="muted brand-caption">ONESTATE ROLEPLAY</div>
+                </div>
+              </div>
+              <div className="online-pill"><i /> ONLINE</div>
+            </header>
+
+            <section className="welcome-row">
+              <div>
+                <div className="muted">Xush kelibsiz,</div>
+                <h1>{me.name || "O‘yinchi"}!</h1>
+              </div>
+              <div className="avatar-chip">⚡</div>
+            </section>
+
+            <section className="balance-card neon-balance">
+              <div className="balance-top">
+                <span className="balance-label">SHAXSIY BALANS</span>
+                <span className="balance-symbol">✦</span>
+              </div>
+              <div className="big balance-amount">{fmt(me.balance)} <small>UZS</small></div>
+              <div className="balance-bottom">
+                <span>Hisobingizdagi mablag‘</span>
+                <button onClick={() => go("topup")}>＋ To‘ldirish</button>
+              </div>
+            </section>
+
+            <section className="section-block">
+              <div className="section-heading">
+                <div><span className="eyebrow">TEZKOR KIRISH</span><h2>Kerakli bo‘lim</h2></div>
+              </div>
+              <div className="quick-grid">
+                <button className="quick-card" onClick={() => go("balance")}>
+                  <span className="quick-icon">◈</span><span>Balans</span><small>Hisobingiz</small>
+                </button>
+                <button className="quick-card" onClick={() => go("orders")}>
+                  <span className="quick-icon">▤</span><span>Oxirgi xarid</span><small>Buyurtmalar</small>
+                </button>
+                <button className="quick-card" onClick={() => go("shop")}>
+                  <span className="quick-icon">★</span><span>TG Stars</span><small>Mahsulotlar</small>
+                </button>
+                <button className="quick-card" onClick={() => go("support")}>
+                  <span className="quick-icon">⌁</span><span>Yordam</span><small>Support bilan aloqa</small>
+                </button>
+              </div>
+            </section>
+
+            <button className="promo-banner" onClick={() => go("shop")}>
+              <span className="promo-orb">✦</span>
+              <span className="promo-copy"><small>ONESTATE RP</small><strong>O‘YININGIZNI<br />YANGI DARAJAGA OLIB CHIQING</strong><em>Donat do‘koniga o‘tish　↗</em></span>
+              <span className="promo-arrow">›</span>
+            </button>
+
+            <section className="section-block games-section">
+              <div className="section-heading">
+                <div><span className="eyebrow">KATALOG</span><h2>O‘yinlar va xizmatlar</h2></div>
+                <button className="text-action" onClick={() => go("shop")}>Barchasi ↗</button>
+              </div>
+              <button className="game-card" onClick={() => go("shop")}>
+                <div className="game-icon">🎮</div>
+                <div className="game-info"><strong>ONESTATE RP</strong><span>Donat va o‘yin xizmatlari</span></div>
+                <span className="game-arrow">→</span>
               </button>
-            ))}
+            </section>
+
             {me.is_admin && (
-              <button className="tile" onClick={() => go("admin")}>
-                <span className="ico">⚙️</span>Admin panel
-              </button>
+              <button className="admin-shortcut" onClick={() => go("admin")}>⚙ Admin panel</button>
             )}
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="header">
-            <button className="back" onClick={() => { go("home"); refresh(); }}>←</button>
-            <h2 className="gold" style={{ margin: 0 }}>{titles[page]}</h2>
-          </div>
-          {page === "shop" && <Shop me={me} refresh={refresh} go={go} />}
-          {page === "balance" && <Balance me={me} />}
-          {page === "topup" && <Topup go={go} />}
-          {page === "orders" && <Orders go={go} />}
-          {page === "profile" && <Profile me={me} />}
-          {page === "support" && <Support ctx={ctx} />}
-          {page === "rules" && <Rules />}
-          {page === "admin" && me.is_admin && <Admin />}
-        </>
-      )}
+          </>
+        ) : (
+          <>
+            <div className="header page-header">
+              <button className="back" onClick={() => { go("home"); refresh(); }}>←</button>
+              <h2 className="neon-text" style={{ margin: 0 }}>{titles[page] || "TITANPAY"}</h2>
+            </div>
+            {page === "shop" && <Shop me={me} refresh={refresh} go={go} />}
+            {page === "balance" && <Balance me={me} />}
+            {page === "topup" && <Topup go={go} />}
+            {page === "orders" && <Orders go={go} />}
+            {page === "profile" && <Profile me={me} />}
+            {page === "support" && <Support ctx={ctx} />}
+            {page === "rules" && <Rules />}
+            {page === "admin" && me.is_admin && <Admin />}
+          </>
+        )}
+      </main>
+
+      <nav className="bottom-nav" aria-label="Asosiy navigatsiya">
+        {BOTTOM_NAV.map(([key, icon, label]) => (
+          <button key={key} className={`nav-item ${page === key ? "active" : ""}`} onClick={() => go(key)}>
+            <span className="nav-icon">{icon}</span><span>{label}</span>
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }
