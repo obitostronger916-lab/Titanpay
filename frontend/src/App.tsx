@@ -52,12 +52,19 @@ export default function App() {
   }, [refresh]);
 
   useEffect(() => {
-    if (!me) return;
-    api<any[]>("/api/banners").then((items) => {
-      setBanners(items || []);
-      setBannerIndex(0);
-    }).catch(() => setBanners([]));
-  }, [me]);
+    if (!me || page !== "home") return;
+    let cancelled = false;
+    api<any[]>("/api/banners")
+      .then((items) => {
+        if (cancelled) return;
+        setBanners(Array.isArray(items) ? items : []);
+        setBannerIndex(0);
+      })
+      .catch(() => {
+        if (!cancelled) setBanners([]);
+      });
+    return () => { cancelled = true; };
+  }, [me, page]);
 
   useEffect(() => {
     if (banners.length < 2) return;
@@ -71,10 +78,34 @@ export default function App() {
   const changeBanner = (direction: number) => setBannerIndex((current) => (current + direction + banners.length) % banners.length);
 
   const openBanner = () => {
-    if (activeBanner?.target_url) {
-      if (tg?.openLink) tg.openLink(activeBanner.target_url);
-      else window.open(activeBanner.target_url, "_blank", "noopener,noreferrer");
+    const rawUrl = activeBanner?.target_url?.trim();
+    if (!rawUrl) {
+      window.alert("Bu banner uchun ochiladigan havola kiritilmagan.");
+      return;
     }
+
+    let url: URL;
+    try {
+      url = new URL(rawUrl);
+    } catch {
+      window.alert("Banner havolasi noto‘g‘ri. Admin panelida https:// bilan boshlanadigan havola kiriting.");
+      return;
+    }
+
+    if (url.protocol !== "https:" && url.protocol !== "http:") {
+      window.alert("Faqat http:// yoki https:// havolalar ochiladi.");
+      return;
+    }
+
+    try {
+      if (tg?.openLink) {
+        tg.openLink(url.toString());
+        return;
+      }
+    } catch {
+      // Fall through to the browser link handler.
+    }
+    window.open(url.toString(), "_blank", "noopener,noreferrer");
   };
 
   useEffect(() => {
