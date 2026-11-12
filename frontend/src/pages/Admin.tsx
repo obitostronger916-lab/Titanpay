@@ -335,7 +335,7 @@ const EMPTY = {
   description: "",
   price: "",
   image_url: "",
-  category: "Umumiy",
+  category: "ONESTATE donat",
   in_stock: true,
   delivery_payload: "",
 };
@@ -418,7 +418,7 @@ function Products() {
         />
 
         <input
-          placeholder="Kategoriya"
+          placeholder="Paket turi (masalan: VIP, valyuta)"
           value={form.category}
           onChange={(e) => set("category", e.target.value)}
         />
