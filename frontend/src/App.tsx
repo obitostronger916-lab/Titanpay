@@ -160,38 +160,6 @@ export default function App() {
               <div className="avatar-chip">⚡</div>
             </section>
 
-            <section className="balance-card neon-balance">
-              <div className="balance-top">
-                <span className="balance-label">SHAXSIY BALANS</span>
-                <span className="balance-symbol">✦</span>
-              </div>
-              <div className="big balance-amount">{fmt(me.balance)} <small>UZS</small></div>
-              <div className="balance-bottom">
-                <span>Hisobingizdagi mablag‘</span>
-                <button onClick={() => go("topup")}>＋ To‘ldirish</button>
-              </div>
-            </section>
-
-            <section className="section-block">
-              <div className="section-heading">
-                <div><span className="eyebrow">TEZKOR KIRISH</span><h2>Kerakli bo‘lim</h2></div>
-              </div>
-              <div className="quick-grid">
-                <button className="quick-card" onClick={() => go("balance")}>
-                  <span className="quick-icon">◈</span><span>Balans</span><small>Hisobingiz</small>
-                </button>
-                <button className="quick-card" onClick={() => go("orders")}>
-                  <span className="quick-icon">▤</span><span>Oxirgi xarid</span><small>Buyurtmalar</small>
-                </button>
-                <button className="quick-card" onClick={() => go("shop")}>
-                  <span className="quick-icon">★</span><span>TG Stars</span><small>Mahsulotlar</small>
-                </button>
-                <button className="quick-card" onClick={() => go("support")}>
-                  <span className="quick-icon">⌁</span><span>Yordam</span><small>Support bilan aloqa</small>
-                </button>
-              </div>
-            </section>
-
             <div className="promo-slider">
               <button className={`promo-banner ${activeBanner?.image_url ? "has-image" : ""}`} onClick={openBanner}>
                 {activeBanner?.image_url && <img className="promo-image" src={activeBanner.image_url} alt={activeBanner.title} />}
@@ -213,6 +181,26 @@ export default function App() {
                 </div>
               )}
             </div>
+
+            <section className="section-block">
+              <div className="section-heading">
+                <div><span className="eyebrow">TEZKOR KIRISH</span><h2>Kerakli bo‘lim</h2></div>
+              </div>
+              <div className="quick-grid">
+                <button className="quick-card" onClick={() => go("balance")}>
+                  <span className="quick-icon">◈</span><span>Balans</span><small>Hisobingiz</small>
+                </button>
+                <button className="quick-card" onClick={() => go("orders")}>
+                  <span className="quick-icon">▤</span><span>Oxirgi xarid</span><small>Buyurtmalar</small>
+                </button>
+                <button className="quick-card" onClick={() => go("shop")}>
+                  <span className="quick-icon">★</span><span>TG Stars</span><small>Mahsulotlar</small>
+                </button>
+                <button className="quick-card" onClick={() => go("support")}>
+                  <span className="quick-icon">⌁</span><span>Yordam</span><small>Support bilan aloqa</small>
+                </button>
+              </div>
+            </section>
 
             <section className="section-block games-section">
               <div className="section-heading">
