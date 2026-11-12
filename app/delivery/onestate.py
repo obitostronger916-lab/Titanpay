@@ -12,7 +12,8 @@ async def deliver(order_id: str, game_nick: str, payload: str | None) -> Deliver
     """ONESTATE RP API adapteri.
     DIQQAT: rasmiy API hujjati yo'q. Quyidagi so'rov formati TAXMINIY — hujjat kelganda
     faqat shu funksiyani moslang. Sozlanmagan bo'lsa DeliveryNotConfigured ko'tariladi.
-    order_id idempotency kaliti sifatida yuboriladi (takroriy yuborishdan himoya)."""
+    Idempotency-Key yuboriladi, ammo rasmiy hujjatsiz provayder uni qo'llashi kafolatlanmaydi.
+    Shu sababli noaniq javoblar avtomatik qayta yuborilmaydi."""
     if not is_configured():
         raise DeliveryNotConfigured("ONESTATE API sozlanmagan")
     try:
