@@ -36,13 +36,14 @@ async def process_queue() -> list[tuple[int, str, str]]:
                 await s.commit()
                 return notes
             except DeliveryRetryable as e:
-                o.delivery_result = f"Qayta uriniladi: {e}"
-                if o.attempts >= MAX_ATTEMPTS:
-                    await refund_order(s, 0, o.id, "Yetkazib bo'lmadi", allow_processing=True)
-                    notes.append((o.user_id, o.id, "error"))
-                else:
-                    o.status = "queued"
+                # So'rov serverga yetib borgan bo'lishi mumkin. Idempotency qo'llanishi
+                # rasmiy tasdiqlanmaguncha avtomatik qayta yuborish takroriy donatga olib kelishi mumkin.
+                o.status = "review"
+                o.delivery_result = (
+                    f"Natija noaniq — serverda tekshirish kerak. Avtomatik qayta yuborilmadi: {e}"
+                )
                 await s.commit()
+                notes.append((o.user_id, o.id, "error"))
                 continue
             o.delivery_result = res.message
             if res.ok:
