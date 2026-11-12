@@ -1,7 +1,13 @@
-import pytest
+import asyncio
 from datetime import datetime, timedelta, timezone
 
-from app.models import Order, Product, User
+import pytest
+from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
+
+from app.db import SessionLocal
+
+from app.models import LedgerEntry, Order, Product, User
 from app.services import ledger
 
 
@@ -198,3 +204,59 @@ async def test_invalid_paid_amount_rejected(session, amount):
     assert await ledger.handle_provider_confirmation(
         session, p.id, "TX-BAD-AMOUNT", amount
     ) == "invalid_amount"
+
+
+async def test_parallel_purchases_do_not_overdraw(session):
+    await mk_user(session, balance=10000)
+    product = await mk_product(session, price=6000)
+    await session.commit()
+
+    async def buy_once():
+        async with SessionLocal() as s:
+            try:
+                await ledger.purchase(s, 1, product.id, "Nick_Name")
+                await s.commit()
+                return "purchased"
+            except ledger.LedgerError:
+                await s.rollback()
+                return "insufficient"
+
+    results = await asyncio.gather(buy_once(), buy_once())
+    assert results.count("purchased") == 1
+
+    async with SessionLocal() as s:
+        user = await s.get(User, 1)
+        orders = (await s.execute(select(func.count(Order.id)))).scalar_one()
+        assert user.balance == 4000
+        assert orders == 1
+
+
+async def test_parallel_webhooks_cannot_credit_same_transaction_twice(session):
+    await mk_user(session)
+    p1 = await ledger.create_payment(session, 1, 50000, "test")
+    p2 = await ledger.create_payment(session, 1, 50000, "test")
+    await session.commit()
+
+    async def confirm(payment_id):
+        async with SessionLocal() as s:
+            try:
+                result = await ledger.handle_provider_confirmation(
+                    s, payment_id, "TX-SHARED", 50000, provider_name="test"
+                )
+                await s.commit()
+                return result
+            except (ledger.LedgerError, IntegrityError):
+                await s.rollback()
+                return "duplicate"
+
+    results = await asyncio.gather(confirm(p1.id), confirm(p2.id))
+    assert results.count("credited") == 1
+    assert results.count("duplicate") + results.count("tx_already_used") == 1
+
+    async with SessionLocal() as s:
+        user = await s.get(User, 1)
+        entries = (await s.execute(select(func.count(LedgerEntry.id)).where(
+            LedgerEntry.kind == "topup"
+        ))).scalar_one()
+        assert user.balance == 50000
+        assert entries == 1
