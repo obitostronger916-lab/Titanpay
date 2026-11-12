@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime, timedelta, timezone
 
 from app.models import Order, Product, User
 from app.services import ledger
@@ -152,3 +153,48 @@ async def test_requeue_without_refund_is_rejected(session):
 
     with pytest.raises(ledger.LedgerError):
         await ledger.admin_requeue_order(session, 111, o.id)
+
+
+async def test_webhook_from_wrong_provider_is_rejected(session):
+    u = await mk_user(session)
+    p = await ledger.create_payment(session, 1, 50000, "uzcard")
+    result = await ledger.handle_provider_confirmation(
+        session, p.id, "TX-WRONG", 50000, provider_name="humo"
+    )
+    assert result == "wrong_provider"
+    assert u.balance == 0
+    assert p.status == "created"
+
+
+async def test_expired_payment_goes_to_manual_review(session):
+    u = await mk_user(session)
+    p = await ledger.create_payment(session, 1, 50000, "test")
+    p.expires_at = datetime.now(timezone.utc) - timedelta(minutes=1)
+
+    result = await ledger.handle_provider_confirmation(
+        session, p.id, "TX-LATE", 50000, provider_name="test"
+    )
+    assert result == "review"
+    assert p.status == "review"
+    assert u.balance == 0
+
+    await ledger.admin_credit_mismatch(session, 111, p.id)
+    assert u.balance == 50000
+
+
+@pytest.mark.parametrize("tx_id", ["", "   ", None, "x" * 129])
+async def test_invalid_provider_transaction_id_rejected(session, tx_id):
+    await mk_user(session)
+    p = await ledger.create_payment(session, 1, 50000, "test")
+    assert await ledger.handle_provider_confirmation(
+        session, p.id, tx_id, 50000
+    ) == "invalid_transaction"
+
+
+@pytest.mark.parametrize("amount", [0, -1, True, 1.5, "50000", None])
+async def test_invalid_paid_amount_rejected(session, amount):
+    await mk_user(session)
+    p = await ledger.create_payment(session, 1, 50000, "test")
+    assert await ledger.handle_provider_confirmation(
+        session, p.id, "TX-BAD-AMOUNT", amount
+    ) == "invalid_amount"
