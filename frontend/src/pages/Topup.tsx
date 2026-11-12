@@ -14,11 +14,12 @@ type Pay = {
 
 export default function Topup({ go }: { go: Nav }) {
   const [amount, setAmount] = useState("");
-  const [method, setMethod] = useState<"UzCard" | "Humo">("UzCard");
   const [err, setErr] = useState("");
   const [info, setInfo] = useState<any>(null);
   const [list, setList] = useState<Pay[]>([]);
   const [busy, setBusy] = useState(false);
+  const [paymentAvailable, setPaymentAvailable] = useState(false);
+  const [paymentStatusLoaded, setPaymentStatusLoaded] = useState(false);
 
   const load = () =>
     api<Pay[]>("/api/payments")
@@ -27,10 +28,19 @@ export default function Topup({ go }: { go: Nav }) {
 
   useEffect(() => {
     load();
+    api<{ available: boolean }>("/api/payment-status")
+      .then((status) => setPaymentAvailable(status.available))
+      .catch(() => setPaymentAvailable(false))
+      .finally(() => setPaymentStatusLoaded(true));
   }, []);
 
   async function create() {
     const value = Number(amount);
+
+    if (!paymentAvailable) {
+      setErr("UzCard/Humo to'lov provayderi hali ulanmagan.");
+      return;
+    }
 
     if (!Number.isSafeInteger(value) || value < 1000) {
       setErr("Kamida 1 000 UZS kiriting.");
@@ -72,68 +82,21 @@ export default function Topup({ go }: { go: Nav }) {
         <div className="muted">ONESTATE ROLEPLAY</div>
         <h2 style={{ margin: "5px 0" }}>Balansni to'ldirish</h2>
         <div className="muted">
-          Hisobingizni UzCard yoki Humo orqali to'ldiring.
+          UzCard va Humo orqali to'lov xizmati holati quyida ko'rsatiladi.
         </div>
       </div>
 
-      <div
-        className="card"
-        style={{
-          background:
-            "linear-gradient(125deg,rgba(54,185,255,.13),rgba(145,108,255,.13))",
-        }}
-      >
-        <div className="row">
-          <div>
-            <div className="muted">To'lov tizimlari</div>
-            <b style={{ fontSize: 18 }}>UZBEKISTAN PAY</b>
-          </div>
-          <span style={{ fontSize: 30 }}>💳</span>
-        </div>
-
-        <div className="grid" style={{ marginTop: 15 }}>
-          <button
-            className="tile"
-            style={{
-              minHeight: 75,
-              borderColor: method === "UzCard" ? "var(--blue)" : undefined,
-              background:
-                method === "UzCard"
-                  ? "rgba(54,185,255,.14)"
-                  : undefined,
-            }}
-            onClick={() => setMethod("UzCard")}
-          >
-            <span className="ico">💳</span>
-            UzCard
-            {method === "UzCard" && (
-              <div className="badge" style={{ marginTop: 5 }}>
-                Tanlangan
-              </div>
-            )}
-          </button>
-
-          <button
-            className="tile"
-            style={{
-              minHeight: 75,
-              borderColor: method === "Humo" ? "var(--blue)" : undefined,
-              background:
-                method === "Humo"
-                  ? "rgba(54,185,255,.14)"
-                  : undefined,
-            }}
-            onClick={() => setMethod("Humo")}
-          >
-            <span className="ico">💳</span>
-            Humo
-            {method === "Humo" && (
-              <div className="badge" style={{ marginTop: 5 }}>
-                Tanlangan
-              </div>
-            )}
-          </button>
-        </div>
+      <div className="card">
+        <h3>To'lov tizimlari</h3>
+        {!paymentStatusLoaded ? (
+          <p className="muted">To'lov tizimi holati tekshirilmoqda...</p>
+        ) : paymentAvailable ? (
+          <p className="muted">To'lov provayderi ulangan. To'lovni davom ettirishingiz mumkin.</p>
+        ) : (
+          <p className="muted">
+            UzCard/Humo provayderi hali ulanmagan. Xizmat tayyor bo'lmaguncha to'lov yaratish yopiq.
+          </p>
+        )}
       </div>
 
       <div className="card">
@@ -150,7 +113,7 @@ export default function Topup({ go }: { go: Nav }) {
           placeholder="Masalan: 50000"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          disabled={busy}
+          disabled={busy || !paymentAvailable}
         />
 
         <div className="chips">
@@ -171,17 +134,15 @@ export default function Topup({ go }: { go: Nav }) {
           className="btn"
           disabled={
             busy ||
+            !paymentAvailable ||
             !Number.isSafeInteger(Number(amount)) ||
             Number(amount) < 1000
           }
           onClick={create}
         >
-          {busy ? "Yaratilmoqda..." : "To'lov yaratish"}
+          {busy ? "Yaratilmoqda..." : paymentAvailable ? "To'lov yaratish" : "Provayder ulanmagan"}
         </button>
 
-        <p className="muted" style={{ marginTop: 12 }}>
-          Tanlangan usul: <b>{method}</b>
-        </p>
       </div>
 
       {info && (
