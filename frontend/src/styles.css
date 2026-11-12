@@ -214,3 +214,30 @@ input:focus,textarea:focus,select:focus { border-color:#54f5a5; box-shadow:0 0 0
   .promo-copy strong { font-size:11px; }
   .nav-item { font-size:8px; }
 }
+
+
+/* Admin banner manager and rotating home slider */
+.promo-slider { margin-top: 18px; }
+.promo-slider .promo-banner { margin-top: 0; min-height: 142px; }
+.promo-banner.has-image { background: #0b2118; isolation: isolate; }
+.promo-image {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; opacity: .34; z-index: -1;
+}
+.promo-banner.has-image::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(4,18,11,.94), rgba(4,18,11,.48));
+  z-index: -1;
+}
+.promo-copy { min-width: 0; }
+.promo-copy strong { overflow-wrap: anywhere; }
+.promo-dots { display: flex; justify-content: center; gap: 7px; padding-top: 10px; }
+.promo-dots button {
+  width: 7px; height: 7px; padding: 0; border: 0; border-radius: 10px;
+  background: #315342; transition: width .2s, background .2s;
+}
+.promo-dots button.active { width: 22px; background: #65f5a5; }
+.banner-admin-image {
+  display: block; width: 100%; max-height: 150px; object-fit: cover;
+  border-radius: 12px; margin-bottom: 12px; background: #0b1423;
+}

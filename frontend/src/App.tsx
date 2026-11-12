@@ -33,6 +33,8 @@ export default function App() {
   const [page, setPage] = useState("home");
   const [ctx, setCtx] = useState<any>(null);
   const [showSplash, setShowSplash] = useState(true);
+  const [banners, setBanners] = useState<any[]>([]);
+  const [bannerIndex, setBannerIndex] = useState(0);
 
   const refresh = useCallback(async () => {
     try {
@@ -48,6 +50,33 @@ export default function App() {
     tg?.expand();
     refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    if (!me) return;
+    api<any[]>("/api/banners").then((items) => {
+      setBanners(items || []);
+      setBannerIndex(0);
+    }).catch(() => setBanners([]));
+  }, [me]);
+
+  useEffect(() => {
+    if (banners.length < 2) return;
+    const timer = window.setInterval(() => {
+      setBannerIndex((current) => (current + 1) % banners.length);
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [banners.length]);
+
+  const activeBanner = banners.length ? banners[bannerIndex % banners.length] : null;
+
+  const openBanner = () => {
+    if (activeBanner?.target_url) {
+      if (tg?.openLink) tg.openLink(activeBanner.target_url);
+      else window.open(activeBanner.target_url, "_blank", "noopener,noreferrer");
+    } else {
+      go("shop");
+    }
+  };
 
   useEffect(() => {
     if (!me) return;
@@ -163,11 +192,27 @@ export default function App() {
               </div>
             </section>
 
-            <button className="promo-banner" onClick={() => go("shop")}>
-              <span className="promo-orb">✦</span>
-              <span className="promo-copy"><small>ONESTATE RP</small><strong>O‘YININGIZNI<br />YANGI DARAJAGA OLIB CHIQING</strong><em>Donat do‘koniga o‘tish　↗</em></span>
-              <span className="promo-arrow">›</span>
-            </button>
+            <div className="promo-slider">
+              <button className={`promo-banner ${activeBanner?.image_url ? "has-image" : ""}`} onClick={openBanner}>
+                {activeBanner?.image_url && <img className="promo-image" src={activeBanner.image_url} alt={activeBanner.title} />}
+                <span className="promo-orb">✦</span>
+                <span className="promo-copy">
+                  <small>{activeBanner?.title || "ONESTATE RP"}</small>
+                  <strong>{activeBanner?.text || "O‘YININGIZNI YANGI DARAJAGA OLIB CHIQING"}</strong>
+                  <em>{activeBanner?.target_url ? "Batafsil ko‘rish ↗" : "Donat do‘koniga o‘tish ↗"}</em>
+                </span>
+                <span className="promo-arrow">›</span>
+              </button>
+              {banners.length > 1 && (
+                <div className="promo-dots">
+                  {banners.map((banner, index) => (
+                    <button key={banner.id} aria-label={`Banner ${index + 1}`}
+                      className={index === bannerIndex ? "active" : ""}
+                      onClick={() => setBannerIndex(index)} />
+                  ))}
+                </div>
+              )}
+            </div>
 
             <section className="section-block games-section">
               <div className="section-heading">
