@@ -116,6 +116,7 @@ export function Orders({ go }: { go: Nav }) {
           </div>
 
           <h3 style={{ margin: "13px 0 5px" }}>{o.product}</h3>
+          <div className="muted">Character: {o.character_name || "—"} · Server: {o.server || "—"}</div>
 
           <div className="price">{fmt(o.price)}</div>
 
