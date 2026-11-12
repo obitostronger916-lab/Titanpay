@@ -17,4 +17,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: cd frontend && npm install && npm run typecheck && npm run build
+      - run: cd frontend && npm install
+      - name: Report frontend dependency audit
+        run: cd frontend && (npm audit --json > npm-audit.json || true) && cat npm-audit.json
+      - run: cd frontend && npm run typecheck && npm run build
