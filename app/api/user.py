@@ -48,13 +48,20 @@ async def active_banners(s: AsyncSession = Depends(get_session), u=Depends(me)):
 
 class BuyIn(BaseModel):
     product_id: int
-    game_nick: str = Field(min_length=2, max_length=64)
+    client_id: str = Field(min_length=1, max_length=64)
+    privacy_id: str = Field(min_length=1, max_length=128)
+    character_name: str = Field(min_length=2, max_length=64)
+    server: str = Field(min_length=1, max_length=32)
 
 
 @router.post("/orders")
 async def buy(body: BuyIn, s: AsyncSession = Depends(get_session), u=Depends(me)):
     try:
-        o = await ledger.purchase(s, u.id, body.product_id, body.game_nick)
+        o = await ledger.purchase(
+            s, u.id, body.product_id, body.character_name,
+            client_id=body.client_id, privacy_id=body.privacy_id,
+            character_name=body.character_name, server=body.server,
+        )
         await s.commit()
     except ledger.LedgerError as e:
         await s.rollback()
