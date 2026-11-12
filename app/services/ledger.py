@@ -96,7 +96,7 @@ async def admin_credit_mismatch(s: AsyncSession, admin_id: int, payment_id: str)
 
 
 async def admin_reject_payment(s: AsyncSession, admin_id: int, payment_id: str):
-    p = await s.get(Payment, payment_id)
+    p = (await s.execute(select(Payment).where(Payment.id == payment_id).with_for_update())).scalar_one_or_none()
     if not p or p.status not in ("mismatch", "review"):
         raise LedgerError("To'lov tekshiruv holatida emas")
     p.status = "rejected"
@@ -126,12 +126,40 @@ async def purchase(s: AsyncSession, user_id: int, product_id: int, game_nick: st
     return order
 
 
-async def refund_order(s: AsyncSession, actor_id: int, order_id: str, reason: str = "") -> str:
+async def refund_order(s: AsyncSession, actor_id: int, order_id: str, reason: str = "",
+                       allow_processing: bool = False) -> str:
+    """Refund faqat navbatdagi buyurtmaga; worker tasdiqlangan yakuniy xatoda processing'ni refund qilishi mumkin."""
     o = (await s.execute(select(Order).where(Order.id == order_id).with_for_update())).scalar_one_or_none()
-    if not o or o.status == "delivered":
-        raise LedgerError("Qaytarib bo'lmaydi")
+    allowed = {"queued"}
+    if allow_processing:
+        allowed.add("processing")
+    if not o or o.status not in allowed:
+        raise LedgerError("Faqat xavfsiz holatdagi buyurtmaga pul qaytariladi")
     await _apply(s, o.user_id, o.price, "refund", "order", o.id, reason)
     o.status = "error"
     o.delivery_result = f"Qaytarildi: {reason}"
     await audit(s, actor_id, "order_refund", o.id)
+    return o.id
+
+
+async def admin_requeue_order(s: AsyncSession, admin_id: int, order_id: str) -> str:
+    """Refund qilingan error buyurtmani qayta navbatga olishdan oldin narxni yana yechadi."""
+    o = (await s.execute(select(Order).where(Order.id == order_id).with_for_update())).scalar_one_or_none()
+    if not o or o.status != "error":
+        raise LedgerError("Faqat xato holatidagi buyurtma qayta navbatga olinadi")
+
+    refunded = await s.execute(select(LedgerEntry.id).where(
+        LedgerEntry.kind == "refund",
+        LedgerEntry.ref_type == "order",
+        LedgerEntry.ref_id == o.id,
+    ))
+    if not refunded.first():
+        raise LedgerError("Refund yozuvi topilmadi; buyurtmani qayta navbatga olib bo'lmaydi")
+
+    await _apply(s, o.user_id, -o.price, "requeue_debit", "order", o.id,
+                 "Qayta navbatga olish uchun qayta yechildi")
+    o.status = "queued"
+    o.attempts = 0
+    o.delivery_result = "Qayta navbatga olindi; summa balansdan qayta yechildi"
+    await audit(s, admin_id, "order_requeue", o.id)
     return o.id

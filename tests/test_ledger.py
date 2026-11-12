@@ -92,3 +92,63 @@ async def test_refund_only_once_and_not_after_delivery(session):
     o2.status = "delivered"
     with pytest.raises(ledger.LedgerError):
         await ledger.refund_order(session, 111, o2.id, "test")
+
+
+async def test_admin_cannot_refund_processing_order(session):
+    u = await mk_user(session, balance=10000)
+    prod = await mk_product(session)
+    o = await ledger.purchase(session, 1, prod.id, "Nick_Name")
+    o.status = "processing"
+    await session.commit()
+
+    with pytest.raises(ledger.LedgerError):
+        await ledger.refund_order(session, 111, o.id, "admin")
+    await session.rollback()
+    await session.refresh(u)
+    assert u.balance == 4000
+
+
+async def test_worker_can_refund_confirmed_processing_failure(session):
+    u = await mk_user(session, balance=10000)
+    prod = await mk_product(session)
+    o = await ledger.purchase(session, 1, prod.id, "Nick_Name")
+    o.status = "processing"
+    await session.commit()
+
+    await ledger.refund_order(session, 0, o.id, "provider rejected", allow_processing=True)
+    await session.commit()
+    await session.refresh(u)
+    assert u.balance == 10000
+    assert o.status == "error"
+
+
+async def test_requeue_requires_refund_and_charges_again(session):
+    u = await mk_user(session, balance=10000)
+    prod = await mk_product(session)
+    o = await ledger.purchase(session, 1, prod.id, "Nick_Name")
+    await session.commit()
+    await ledger.refund_order(session, 111, o.id, "temporary failure")
+    await session.commit()
+    await session.refresh(u)
+    assert u.balance == 10000
+
+    await ledger.admin_requeue_order(session, 111, o.id)
+    await session.commit()
+    await session.refresh(u)
+    assert u.balance == 4000
+    assert o.status == "queued"
+    assert o.attempts == 0
+
+    with pytest.raises(ledger.LedgerError):
+        await ledger.admin_requeue_order(session, 111, o.id)
+
+
+async def test_requeue_without_refund_is_rejected(session):
+    await mk_user(session, balance=10000)
+    prod = await mk_product(session)
+    o = await ledger.purchase(session, 1, prod.id, "Nick_Name")
+    o.status = "error"
+    await session.commit()
+
+    with pytest.raises(ledger.LedgerError):
+        await ledger.admin_requeue_order(session, 111, o.id)

@@ -188,12 +188,12 @@ async def all_orders(status: str | None = None, s: AsyncSession = Depends(get_se
 
 @router.post("/orders/{oid}/requeue")
 async def requeue(oid: str, admin=Depends(admin_only), s: AsyncSession = Depends(get_session)):
-    o = await s.get(Order, oid)
-    if not o or o.status not in ("queued", "processing"):
-        raise HTTPException(400, "Faqat navbat/jarayondagi buyurtma")
-    o.status, o.attempts = "queued", 0
-    await ledger.audit(s, admin["id"], "order_requeue", oid)
-    await s.commit()
+    try:
+        await ledger.admin_requeue_order(s, admin["id"], oid)
+        await s.commit()
+    except ledger.LedgerError as e:
+        await s.rollback()
+        raise HTTPException(400, str(e))
     return {"ok": True}
 
 

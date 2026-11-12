@@ -38,7 +38,7 @@ async def process_queue() -> list[tuple[int, str, str]]:
             except DeliveryRetryable as e:
                 o.delivery_result = f"Qayta uriniladi: {e}"
                 if o.attempts >= MAX_ATTEMPTS:
-                    await refund_order(s, 0, o.id, "Yetkazib bo'lmadi")
+                    await refund_order(s, 0, o.id, "Yetkazib bo'lmadi", allow_processing=True)
                     notes.append((o.user_id, o.id, "error"))
                 else:
                     o.status = "queued"
@@ -49,7 +49,7 @@ async def process_queue() -> list[tuple[int, str, str]]:
                 o.status = "delivered"
                 notes.append((o.user_id, o.id, "delivered"))
             else:
-                await refund_order(s, 0, o.id, res.message)
+                await refund_order(s, 0, o.id, res.message, allow_processing=True)
                 notes.append((o.user_id, o.id, "error"))
             await s.commit()
     return notes
