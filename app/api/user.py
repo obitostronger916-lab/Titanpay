@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.db import get_session
-from app.models import Banner, LedgerEntry, Order, Payment, Product, Ticket, TicketMessage
+from app.models import AppSetting, Banner, LedgerEntry, Order, Payment, Product, Ticket, TicketMessage
 from app.providers import get_provider
 from app.providers.base import ProviderNotConfigured
 from app.security import current_user
@@ -28,6 +28,12 @@ async def me(tg: dict = Depends(current_user), s: AsyncSession = Depends(get_ses
 async def get_me(u=Depends(me)):
     return {"id": u.id, "name": u.first_name, "balance": u.balance,
             "is_admin": bool(settings.ADMIN_ID and u.id == settings.ADMIN_ID)}
+
+
+@router.get("/app-settings")
+async def app_settings(s: AsyncSession = Depends(get_session), u=Depends(me)):
+    setting = await s.get(AppSetting, "background_image")
+    return {"background_image": setting.value if setting else None}
 
 
 @router.get("/products")
