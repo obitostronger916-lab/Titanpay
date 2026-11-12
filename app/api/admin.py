@@ -6,7 +6,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_session
-from app.models import (AuditLog, Banner, Order, Payment, Product, Ticket,
+from app.models import (AppSetting, AuditLog, Banner, Order, Payment, Product, Ticket,
                         TicketMessage, User)
 from app.security import admin_only
 from app.services import ledger
@@ -244,3 +244,37 @@ async def audit_log(s: AsyncSession = Depends(get_session)):
     rows = (await s.execute(select(AuditLog).order_by(AuditLog.id.desc()).limit(200))).scalars().all()
     return [{"actor": a.actor_id, "action": a.action, "details": a.details,
              "at": a.created_at.isoformat()} for a in rows]
+
+
+class BackgroundIn(BaseModel):
+    image_data: str = Field(min_length=30, max_length=2_800_000)
+
+    @field_validator("image_data")
+    @classmethod
+    def validate_image_data(cls, value: str):
+        allowed = ("data:image/jpeg;base64,", "data:image/png;base64,", "data:image/webp;base64,")
+        if not value.startswith(allowed):
+            raise ValueError("Faqat JPG, PNG yoki WebP rasm yuklang")
+        return value
+
+
+@router.put("/settings/background")
+async def save_background(body: BackgroundIn, admin=Depends(admin_only), s: AsyncSession = Depends(get_session)):
+    setting = await s.get(AppSetting, "background_image")
+    if setting:
+        setting.value = body.image_data
+    else:
+        s.add(AppSetting(key="background_image", value=body.image_data))
+    await ledger.audit(s, admin["id"], "background_update", "Umumiy ilova foni yangilandi")
+    await s.commit()
+    return {"ok": True}
+
+
+@router.delete("/settings/background")
+async def remove_background(admin=Depends(admin_only), s: AsyncSession = Depends(get_session)):
+    setting = await s.get(AppSetting, "background_image")
+    if setting:
+        await s.delete(setting)
+    await ledger.audit(s, admin["id"], "background_remove", "Umumiy ilova foni olib tashlandi")
+    await s.commit()
+    return {"ok": True}
