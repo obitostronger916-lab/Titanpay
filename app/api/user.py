@@ -97,6 +97,13 @@ class TopupIn(BaseModel):
     amount: int = Field(ge=1000, le=50_000_000)
 
 
+@router.get("/payment-status")
+async def payment_status(u=Depends(me)):
+    # Noma'lum yoki ulanmagan provayder hech qachon tayyor deb ko'rsatilmaydi.
+    provider = get_provider()
+    return {"available": provider.name != "none", "provider": provider.name}
+
+
 @router.post("/payments")
 async def create_topup(body: TopupIn, s: AsyncSession = Depends(get_session), u=Depends(me)):
     provider = get_provider()
