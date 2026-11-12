@@ -110,7 +110,9 @@ async def admin_adjust(s: AsyncSession, admin_id: int, user_id: int, amount: int
     return bal
 
 
-async def purchase(s: AsyncSession, user_id: int, product_id: int, game_nick: str) -> Order:
+async def purchase(s: AsyncSession, user_id: int, product_id: int, game_nick: str,
+                   *, client_id: str = "", privacy_id: str = "",
+                   character_name: str | None = None, server: str = "") -> Order:
     """Balansdan yechib, buyurtmani 'queued' holatda yaratadi (bitta transaksiyada)."""
     prod = await s.get(Product, product_id)
     if not prod or not prod.in_stock:
@@ -119,7 +121,9 @@ async def purchase(s: AsyncSession, user_id: int, product_id: int, game_nick: st
     if not (2 <= len(nick) <= 64):
         raise LedgerError("O'yin nikini to'g'ri kiriting")
     order = Order(user_id=user_id, product_id=prod.id, product_name=prod.name,
-                  price=prod.price, game_nick=nick, status="queued")
+                  price=prod.price, game_nick=nick, status="queued",
+                  client_id=client_id.strip() or None, privacy_id=privacy_id.strip() or None,
+                  character_name=(character_name or nick).strip(), server_name=server.strip() or None)
     s.add(order)
     await s.flush()
     await _apply(s, user_id, -prod.price, "purchase", "order", order.id)
