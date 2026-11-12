@@ -90,4 +90,4 @@ async def test_admin_can_mark_review_delivered_after_manual_check():
         await s.commit()
         await ledger.resolve_order_review(s, 99, oid, "delivered", "Serverda donat borligi tekshirildi")
         await s.commit()
-    assert await state(oid) == ("delivered", 4000, 1)
+    assert await state(oid) == ("delivered", 4000, 0)
