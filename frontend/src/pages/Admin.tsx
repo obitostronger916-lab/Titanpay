@@ -104,7 +104,8 @@ function Stats() {
     ["Jami to'ldirilgan", fmt(data.topups_total), "💳"],
     ["Navbatdagi buyurtmalar", data.orders_queued, "📦"],
     ["Yetkazilgan buyurtmalar", data.orders_delivered, "✅"],
-    ["Tekshiruvdagi to'lovlar", data.payments_review, "🔎"],
+    ["Tekshiruvdagi donatlar", data.orders_review, "🔎"],
+    ["Tekshiruvdagi to'lovlar", data.payments_review, "💳"],
     ["Ochiq murojaatlar", data.tickets_open, "💬"],
   ];
 
@@ -246,7 +247,7 @@ function Orders() {
       <h3>Buyurtmalar</h3>
 
       <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-        {["queued", "processing", "delivered", "error"].map((s) => (
+        {["queued", "processing", "review", "delivered", "error"].map((s) => (
           <option key={s} value={s}>
             {STATUS_UZ[s] || s}
           </option>
@@ -284,40 +285,40 @@ function Orders() {
               </div>
             )}
 
-            {o.status !== "delivered" && o.status !== "error" && (
+            {o.status === "queued" && (
               <div className="row" style={{ marginTop: 14 }}>
-                <button
-                  className="btn ghost small"
-                  onClick={() =>
-                    act(
-                      () =>
-                        api(
-                          `/api/admin/orders/${o.id}/requeue`,
-                          "POST"
-                        ),
-                      load
-                    )
-                  }
-                >
+                <button className="btn ghost small"
+                  onClick={() => act(() => api(`/api/admin/orders/${o.id}/requeue`, "POST"), load)}>
                   Qayta navbatga
                 </button>
-
-                <button
-                  className="btn red small"
-                  onClick={() =>
-                    confirm("Pul foydalanuvchi balansiga qaytarilsinmi?") &&
-                    act(
-                      () =>
-                        api(
-                          `/api/admin/orders/${o.id}/refund`,
-                          "POST"
-                        ),
-                      load
-                    )
-                  }
-                >
+                <button className="btn red small"
+                  onClick={() => confirm("Pul foydalanuvchi balansiga qaytarilsinmi?") &&
+                    act(() => api(`/api/admin/orders/${o.id}/refund`, "POST"), load)}>
                   Pulni qaytarish
                 </button>
+              </div>
+            )}
+
+            {o.status === "review" && (
+              <div className="card" style={{ marginTop: 14 }}>
+                <b>Qo'lda tekshirish shart</b>
+                <p className="muted">Avval ONESTATE serverida buyurtma bajarilgan-bajarilmaganini tekshiring. Tasdiqlamasdan qayta yubormang.</p>
+                <div className="row">
+                  <button className="btn small" onClick={() =>
+                    confirm("Serverda donat borligini tekshirdingizmi? Buyurtma yetkazildi deb belgilanadi.") &&
+                    act(() => api(`/api/admin/orders/${o.id}/resolve`, "POST", {
+                      action: "delivered", note: "Admin ONESTATE serverida tekshirdi"
+                    }), load)}>
+                    Yetkazildi deb belgilash
+                  </button>
+                  <button className="btn red small" onClick={() =>
+                    confirm("Serverda donat yo'qligini tekshirdingizmi? Pul qaytariladi.") &&
+                    act(() => api(`/api/admin/orders/${o.id}/resolve`, "POST", {
+                      action: "refund", note: "Admin ONESTATE serverida tekshirdi"
+                    }), load)}>
+                    Pulni qaytarish
+                  </button>
+                </div>
               </div>
             )}
           </div>
