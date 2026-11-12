@@ -65,7 +65,7 @@ async def test_ambiguous_error_moves_order_to_review_without_retry(monkeypatch):
 
     monkeypatch.setattr(onestate, "is_configured", lambda: True)
     monkeypatch.setattr(onestate, "deliver", fake)
-    assert await process_queue() == [(1, oid, "error")]
+    assert await process_queue() == [(1, oid, "review")]
     assert await state(oid) == ("review", 4000, 1)
     assert await process_queue() == []
     assert calls == 1
