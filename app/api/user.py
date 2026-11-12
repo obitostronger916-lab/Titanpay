@@ -39,7 +39,7 @@ async def products(s: AsyncSession = Depends(get_session), u=Depends(me)):
 @router.get("/banners")
 async def active_banners(s: AsyncSession = Depends(get_session), u=Depends(me)):
     rows = (await s.execute(
-        select(Banner).where(Banner.enabled.is_(True)).order_by(Banner.id)
+        select(Banner).where(Banner.enabled.is_(True)).order_by(Banner.id.desc())
     )).scalars().all()
     return [{"id": b.id, "title": b.title, "text": b.text,
              "image_url": b.image_url, "target_url": b.target_url}
