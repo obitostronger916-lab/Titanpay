@@ -18,6 +18,6 @@ jobs:
         with:
           node-version: "20"
       - run: cd frontend && npm install
-      - name: Report frontend dependency audit
-        run: cd frontend && (npm audit --json > npm-audit.json || true) && cat npm-audit.json
+      - name: Audit frontend dependencies
+        run: cd frontend && npm audit --audit-level=moderate
       - run: cd frontend && npm run typecheck && npm run build
