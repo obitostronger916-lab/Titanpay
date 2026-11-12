@@ -10,6 +10,7 @@ const TABS = [
   "Foydalanuvchilar",
   "Support",
   "Audit",
+  "Bannerlar",
 ];
 
 export default function Admin() {
@@ -42,6 +43,7 @@ export default function Admin() {
       {tab === TABS[4] && <Users />}
       {tab === TABS[5] && <Tickets />}
       {tab === TABS[6] && <Audit />}
+      {tab === TABS[7] && <Banners />}
     </>
   );
 }
@@ -496,6 +498,108 @@ function Products() {
             </div>
           </button>
         ))}
+    </>
+  );
+}
+
+
+const EMPTY_BANNER = {
+  title: "",
+  text: "",
+  image_url: "",
+  target_url: "",
+  enabled: true,
+};
+
+function Banners() {
+  const { data, err, loading, load } = useLoad("/api/admin/banners");
+  const [form, setForm] = useState<any>({ ...EMPTY_BANNER });
+  const [editId, setEditId] = useState<number | null>(null);
+
+  const set = (key: string, value: any) =>
+    setForm((old: any) => ({ ...old, [key]: value }));
+
+  function reset() {
+    setForm({ ...EMPTY_BANNER });
+    setEditId(null);
+  }
+
+  function save() {
+    const body = {
+      ...form,
+      title: form.title.trim(),
+      text: form.text.trim(),
+      image_url: form.image_url.trim() || null,
+      target_url: form.target_url.trim() || null,
+    };
+    if (body.title.length < 2) return;
+    act(
+      () => editId
+        ? api(`/api/admin/banners/${editId}`, "PUT", body)
+        : api("/api/admin/banners", "POST", body),
+      () => { reset(); load(); }
+    );
+  }
+
+  function toggle(b: any) {
+    act(
+      () => api(`/api/admin/banners/${b.id}`, "PUT", {
+        title: b.title, text: b.text || "", image_url: b.image_url || null,
+        target_url: b.target_url || null, enabled: !b.enabled,
+      }),
+      load
+    );
+  }
+
+  return (
+    <>
+      <div className="card">
+        <div className="row">
+          <h3 style={{ margin: 0 }}>{editId ? "Banner tahrirlash" : "Yangi banner"}</h3>
+          <span className="badge">SLIDER</span>
+        </div>
+        <input placeholder="Banner sarlavhasi" maxLength={120}
+          value={form.title} onChange={(e) => set("title", e.target.value)} />
+        <textarea rows={3} placeholder="Banner matni"
+          value={form.text} onChange={(e) => set("text", e.target.value)} />
+        <input placeholder="Rasm URL (https://...)" type="url"
+          value={form.image_url || ""} onChange={(e) => set("image_url", e.target.value)} />
+        <input placeholder="Bosilganda ochiladigan havola (https://...) " type="url"
+          value={form.target_url || ""} onChange={(e) => set("target_url", e.target.value)} />
+        <label className="row" style={{ margin: "10px 0" }}>
+          <span>Banner faol</span>
+          <input type="checkbox" style={{ width: 24, margin: 0 }}
+            checked={form.enabled} onChange={(e) => set("enabled", e.target.checked)} />
+        </label>
+        <button className="btn" disabled={form.title.trim().length < 2} onClick={save}>
+          {editId ? "O'zgarishlarni saqlash" : "Banner qo'shish"}
+        </button>
+        {editId && <button className="btn ghost" style={{ marginTop: 8 }} onClick={reset}>Bekor qilish</button>}
+      </div>
+
+      <div className="row" style={{ marginBottom: 12 }}>
+        <h3 style={{ margin: 0 }}>Bannerlar ro'yxati</h3>
+        <button className="chip" onClick={load}>Yangilash ↻</button>
+      </div>
+      {loading && <LoadingView />}
+      {err && <ErrorView message={err} />}
+      {!loading && !err && (data || []).map((b: any) => (
+        <div className="card" key={b.id}>
+          {b.image_url && <img className="banner-admin-image" src={b.image_url} alt={b.title} />}
+          <div className="row">
+            <b>{b.title}</b>
+            <span className={`badge ${b.enabled ? "" : "muted"}`}>{b.enabled ? "Faol" : "O'chirilgan"}</span>
+          </div>
+          {b.text && <p className="muted">{b.text}</p>}
+          {b.target_url && <div className="muted" style={{ overflowWrap: "anywhere" }}>{b.target_url}</div>}
+          <div className="row" style={{ marginTop: 12 }}>
+            <button className="btn ghost small" onClick={() => { setEditId(b.id); setForm({ ...b, image_url: b.image_url || "", target_url: b.target_url || "" }); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Tahrirlash</button>
+            <button className="btn ghost small" onClick={() => toggle(b)}>{b.enabled ? "O'chirish" : "Faollashtirish"}</button>
+            <button className="btn red small" onClick={() => confirm("Banner butunlay o'chirilsinmi?") && act(() => api(`/api/admin/banners/${b.id}`, "DELETE"), load)}>O'chirish</button>
+          </div>
+        </div>
+      ))}
+      {!loading && !err && (data || []).length === 0 && <div className="card muted">Hozircha banner yo'q.</div>}
     </>
   );
 }
