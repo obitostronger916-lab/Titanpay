@@ -56,6 +56,47 @@ async def test_same_provider_tx_cannot_credit_two_payments(session):
     assert u.balance == 50000
 
 
+async def test_invalid_payment_events_are_rejected_without_changing_payment(session):
+    u = await mk_user(session)
+    p = await ledger.create_payment(session, 1, 50000, "test")
+
+    for amount in (0, -1, True, "50000"):
+        assert await ledger.handle_provider_confirmation(session, p.id, "TX1", amount) == "invalid_amount"
+    for tx_id in ("", "   ", "X" * 129):
+        assert await ledger.handle_provider_confirmation(session, p.id, tx_id, 50000) == "invalid_event"
+
+    await session.refresh(p)
+    assert p.status == "created"
+    assert p.provider_tx_id is None
+    assert u.balance == 0
+
+
+async def test_payment_must_match_active_provider(session):
+    u = await mk_user(session)
+    p = await ledger.create_payment(session, 1, 50000, "provider_a")
+
+    result = await ledger.handle_provider_confirmation(
+        session, p.id, "TX1", 50000, expected_provider="provider_b")
+
+    assert result == "provider_mismatch"
+    await session.refresh(p)
+    assert p.status == "created"
+    assert p.provider_tx_id is None
+    assert u.balance == 0
+
+
+async def test_admin_cannot_credit_non_positive_mismatch(session):
+    u = await mk_user(session)
+    p = await ledger.create_payment(session, 1, 50000, "test")
+    p.status = "mismatch"
+    p.paid_amount = -100
+    await session.flush()
+
+    with pytest.raises(ledger.LedgerError):
+        await ledger.admin_credit_mismatch(session, 111, p.id)
+    assert u.balance == 0
+
+
 async def test_ledger_reference_is_idempotent(session):
     u = await mk_user(session)
     await ledger._apply(session, 1, 100, "adjust", "admin", "REF1")
