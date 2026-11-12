@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.db import get_session
-from app.models import LedgerEntry, Order, Payment, Product, Ticket, TicketMessage
+from app.models import Banner, LedgerEntry, Order, Payment, Product, Ticket, TicketMessage
 from app.providers import get_provider
 from app.providers.base import ProviderNotConfigured
 from app.security import current_user
@@ -34,6 +34,16 @@ async def products(s: AsyncSession = Depends(get_session), u=Depends(me)):
     rows = (await s.execute(select(Product).where(Product.in_stock.is_(True)))).scalars().all()
     return [{"id": p.id, "name": p.name, "description": p.description, "price": p.price,
              "image_url": p.image_url, "category": p.category} for p in rows]
+
+
+@router.get("/banners")
+async def active_banners(s: AsyncSession = Depends(get_session), u=Depends(me)):
+    rows = (await s.execute(
+        select(Banner).where(Banner.enabled.is_(True)).order_by(Banner.id)
+    )).scalars().all()
+    return [{"id": b.id, "title": b.title, "text": b.text,
+             "image_url": b.image_url, "target_url": b.target_url}
+            for b in rows]
 
 
 class BuyIn(BaseModel):
