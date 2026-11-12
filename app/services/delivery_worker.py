@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 from app.db import SessionLocal
 from app.delivery import onestate
-from app.delivery.base import DeliveryNotConfigured, DeliveryRetryable
+from app.delivery.base import DeliveryNotConfigured, DeliveryRetryable, DeliveryUncertain
 from app.models import Order, Product
 from app.services.ledger import refund_order
 
@@ -35,6 +35,12 @@ async def process_queue() -> list[tuple[int, str, str]]:
                 o.status = "queued"
                 await s.commit()
                 return notes
+            except DeliveryUncertain as e:
+                # Tashqi servis buyurtmani qabul qilgan bo'lishi mumkin.
+                # Holatni processing'da ushlab, avtomatik retry/refundni to'xtatamiz.
+                o.delivery_result = f"Natija noaniq; admin tekshiruvi kerak: {e}"
+                await s.commit()
+                continue
             except DeliveryRetryable as e:
                 o.delivery_result = f"Qayta uriniladi: {e}"
                 if o.attempts >= MAX_ATTEMPTS:
