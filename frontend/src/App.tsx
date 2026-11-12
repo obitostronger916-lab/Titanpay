@@ -73,8 +73,6 @@ export default function App() {
     if (activeBanner?.target_url) {
       if (tg?.openLink) tg.openLink(activeBanner.target_url);
       else window.open(activeBanner.target_url, "_blank", "noopener,noreferrer");
-    } else {
-      go("shop");
     }
   };
 
@@ -167,7 +165,7 @@ export default function App() {
                 <span className="promo-copy">
                   <small>{activeBanner?.title || "ONESTATE RP"}</small>
                   <strong>{activeBanner?.text || "O‘YININGIZNI YANGI DARAJAGA OLIB CHIQING"}</strong>
-                  <em>{activeBanner?.target_url ? "Batafsil ko‘rish ↗" : "Donat do‘koniga o‘tish ↗"}</em>
+                  {activeBanner?.target_url && <em>Batafsil ko‘rish ↗</em>}
                 </span>
                 <span className="promo-arrow">›</span>
               </button>
