@@ -11,6 +11,7 @@ from app.providers.base import ProviderNotConfigured
 from app.security import current_user
 from app.services import ledger
 from datetime import datetime, timezone
+from typing import Literal
 
 router = APIRouter(prefix="/api")
 
@@ -51,7 +52,7 @@ class BuyIn(BaseModel):
     client_id: str = Field(min_length=1, max_length=64)
     privacy_id: str = Field(min_length=1, max_length=128)
     character_name: str = Field(min_length=2, max_length=64)
-    server: str = Field(min_length=1, max_length=32)
+    server: Literal["LOMITA CIS", "HILLS CIS", "LYNWOOD CIS", "BELL CIS", "COVINA CIS", "GLENDALE CIS"]
 
 
 @router.post("/orders")
