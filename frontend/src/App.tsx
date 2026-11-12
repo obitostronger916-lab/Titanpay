@@ -35,6 +35,7 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [banners, setBanners] = useState<any[]>([]);
   const [bannerIndex, setBannerIndex] = useState(0);
+  const [sharedBackground, setSharedBackground] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -53,6 +54,9 @@ export default function App() {
 
   useEffect(() => {
     if (!me) return;
+    api<{ background_image: string | null }>("/api/app-settings")
+      .then((settings) => setSharedBackground(settings.background_image || null))
+      .catch(() => setSharedBackground(null));
     api<any[]>("/api/banners").then((items) => {
       setBanners(items || []);
       setBannerIndex(0);
@@ -66,6 +70,15 @@ export default function App() {
     }, 5000);
     return () => window.clearInterval(timer);
   }, [banners.length]);
+
+  useEffect(() => {
+    if (sharedBackground) {
+      document.documentElement.style.setProperty("--shared-background-image", `url("${sharedBackground}")`);
+    } else {
+      document.documentElement.style.removeProperty("--shared-background-image");
+    }
+    return () => document.documentElement.style.removeProperty("--shared-background-image");
+  }, [sharedBackground]);
 
   const activeBanner = banners.length ? banners[bannerIndex % banners.length] : null;
   const changeBanner = (direction: number) => setBannerIndex((current) => (current + direction + banners.length) % banners.length);
