@@ -436,3 +436,17 @@ input:focus, textarea:focus, select:focus {
   .promo-banner { animation: promo-arrive .35s ease-out; }
   @keyframes promo-arrive { from { opacity:.72; transform:translateY(4px) scale(.995); } to { opacity:1; transform:translateY(0) scale(1); } }
 }
+
+
+/* Keep image-backed promo banners on the blue/violet TITANPAY theme.
+   The earlier .promo-banner.has-image rule used a green fallback background
+   with higher specificity than the later violet .promo-banner rule. */
+.promo-banner.has-image {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(143,92,255,.38), transparent 38%),
+    linear-gradient(120deg, rgba(255,255,255,.16), rgba(36,34,110,.62) 45%, rgba(7,13,48,.88));
+  border-color: rgba(207,207,255,.54);
+}
+.promo-banner.has-image::after {
+  background: linear-gradient(90deg, rgba(5,8,31,.88), rgba(9,12,46,.30));
+}
