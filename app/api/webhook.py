@@ -15,14 +15,15 @@ async def payment_webhook(request: Request, x_signature: str = Header(default=""
     raw = await request.body()
     if not verify_webhook_signature(raw, x_signature):
         raise HTTPException(401, "Imzo noto'g'ri")
+    provider = get_provider()
     try:
-        ev = await get_provider().parse_webhook(raw)
+        ev = await provider.parse_webhook(raw)
     except ProviderNotConfigured:
         raise HTTPException(503, "Provayder ulanmagan")
     async with SessionLocal() as s:
         try:
             result = await ledger.handle_provider_confirmation(
-                s, ev.payment_id, ev.provider_tx_id, ev.paid_amount)
+                s, ev.payment_id, ev.provider_tx_id, ev.paid_amount, provider.name)
             await s.commit()
         except (ledger.LedgerError, IntegrityError):
             await s.rollback()
