@@ -75,7 +75,7 @@ async def my_orders(s: AsyncSession = Depends(get_session), u=Depends(me)):
     rows = (await s.execute(select(Order).where(Order.user_id == u.id)
                             .order_by(Order.created_at.desc()).limit(50))).scalars().all()
     return [{"id": o.id, "product": o.product_name, "price": o.price, "status": o.status,
-             "created_at": o.created_at.isoformat(), "result": o.delivery_result} for o in rows]
+             "created_at": o.created_at.isoformat(), "result": o.delivery_result,\n             "character_name": o.character_name or o.game_nick, "server": o.server_name} for o in rows]
 
 
 @router.get("/ledger")
