@@ -83,29 +83,6 @@ export default function Shop({
         </div>
       </div>
 
-      <div
-        className="card"
-        style={{
-          background:
-            "linear-gradient(120deg,rgba(54,185,255,.13),rgba(145,108,255,.13))",
-        }}
-      >
-        <div className="row">
-          <div>
-            <div className="muted">Mavjud balans</div>
-            <div className="big gold">{fmt(me.balance)}</div>
-          </div>
-          <div style={{ fontSize: 35 }}>💎</div>
-        </div>
-        <button
-          className="btn ghost"
-          style={{ marginTop: 12 }}
-          onClick={() => go("topup")}
-        >
-          + Balansni to'ldirish
-        </button>
-      </div>
-
       {done && (
         <div className="card">
           <div className="ok">✓ {done}</div>
