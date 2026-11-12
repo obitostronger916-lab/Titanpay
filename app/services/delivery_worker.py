@@ -14,7 +14,7 @@ MAX_ATTEMPTS = 5
 
 
 async def process_queue() -> list[tuple[int, str, str]]:
-    """Navbatdagi buyurtmalarni yuboradi. Qaytaradi: [(user_id, order_id, 'delivered'|'error')]"""
+    """Navbatdagi buyurtmalarni yuboradi. Qaytaradi: [(user_id, order_id, 'delivered'|'error'|'review')]"""
     notes = []
     if not onestate.is_configured():
         return notes  # API yo'q => buyurtmalar navbatda turadi
@@ -43,7 +43,7 @@ async def process_queue() -> list[tuple[int, str, str]]:
                     f"Natija noaniq — serverda tekshirish kerak. Avtomatik qayta yuborilmadi: {e}"
                 )
                 await s.commit()
-                notes.append((o.user_id, o.id, "error"))
+                notes.append((o.user_id, o.id, "review"))
                 continue
             o.delivery_result = res.message
             if res.ok:
