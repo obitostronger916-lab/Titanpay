@@ -1,10 +1,12 @@
+from urllib.parse import urlparse
+
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_session
-from app.models import (AuditLog, Order, Payment, Product, Ticket,
+from app.models import (AuditLog, Banner, Order, Payment, Product, Ticket,
                         TicketMessage, User)
 from app.security import admin_only
 from app.services import ledger
@@ -93,6 +95,64 @@ class ProductIn(BaseModel):
 async def all_products(s: AsyncSession = Depends(get_session)):
     rows = (await s.execute(select(Product).order_by(Product.id))).scalars().all()
     return [{**{c: getattr(p, c) for c in ProductIn.model_fields}, "id": p.id} for p in rows]
+
+
+class BannerIn(BaseModel):
+    title: str = Field(min_length=2, max_length=120)
+    text: str = Field(default="", max_length=500)
+    image_url: str | None = Field(default=None, max_length=1000)
+    target_url: str | None = Field(default=None, max_length=1000)
+    enabled: bool = True
+
+    @field_validator("image_url", "target_url")
+    @classmethod
+    def validate_http_url(cls, value):
+        if value is None or not value.strip():
+            return None
+        parsed = urlparse(value.strip())
+        if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            raise ValueError("Faqat http yoki https havola kiriting")
+        return value.strip()
+
+
+@router.get("/banners")
+async def all_banners(s: AsyncSession = Depends(get_session)):
+    rows = (await s.execute(select(Banner).order_by(Banner.id.desc()))).scalars().all()
+    return [{"id": b.id, "title": b.title, "text": b.text,
+             "image_url": b.image_url, "target_url": b.target_url,
+             "enabled": b.enabled} for b in rows]
+
+
+@router.post("/banners")
+async def add_banner(body: BannerIn, admin=Depends(admin_only), s: AsyncSession = Depends(get_session)):
+    banner = Banner(**body.model_dump())
+    s.add(banner)
+    await ledger.audit(s, admin["id"], "banner_add", body.title)
+    await s.commit()
+    return {"id": banner.id}
+
+
+@router.put("/banners/{banner_id}")
+async def edit_banner(banner_id: int, body: BannerIn, admin=Depends(admin_only), s: AsyncSession = Depends(get_session)):
+    banner = await s.get(Banner, banner_id)
+    if not banner:
+        raise HTTPException(404, "Banner topilmadi")
+    for key, value in body.model_dump().items():
+        setattr(banner, key, value)
+    await ledger.audit(s, admin["id"], "banner_edit", str(banner_id))
+    await s.commit()
+    return {"ok": True}
+
+
+@router.delete("/banners/{banner_id}")
+async def delete_banner(banner_id: int, admin=Depends(admin_only), s: AsyncSession = Depends(get_session)):
+    banner = await s.get(Banner, banner_id)
+    if not banner:
+        raise HTTPException(404, "Banner topilmadi")
+    await ledger.audit(s, admin["id"], "banner_delete", str(banner_id))
+    await s.delete(banner)
+    await s.commit()
+    return {"ok": True}
 
 
 @router.post("/products")
