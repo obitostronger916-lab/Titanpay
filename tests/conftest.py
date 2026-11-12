@@ -1,13 +1,13 @@
 import os
 
 # Sozlamalar app import qilinishidan OLDIN o'rnatiladi
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./test_titan.db"
-os.environ["BOT_TOKEN"] = "123456:TESTTOKEN"
-os.environ["ADMIN_ID"] = "111"
-os.environ["PAYMENT_PROVIDER"] = "none"
-os.environ["PAYMENT_WEBHOOK_SECRET"] = "whsec_test"
-os.environ["ONESTATE_API_URL"] = ""
-os.environ["ONESTATE_API_KEY"] = ""
+os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///./test_titan.db")
+os.environ.setdefault("BOT_TOKEN", "123456:TESTTOKEN")
+os.environ.setdefault("ADMIN_ID", "111")
+os.environ.setdefault("PAYMENT_PROVIDER", "none")
+os.environ.setdefault("PAYMENT_WEBHOOK_SECRET", "whsec_test")
+os.environ.setdefault("ONESTATE_API_URL", "")
+os.environ.setdefault("ONESTATE_API_KEY", "")
 
 import pytest_asyncio  # noqa: E402
 
