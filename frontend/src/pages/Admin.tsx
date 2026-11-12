@@ -553,7 +553,11 @@ function Banners() {
 
   return (
     <>
-      <div className="card">
+      <div className="card banner-manager-card">
+        <div className="banner-manager-intro">
+          <span className="eyebrow">REKLAMA BOSHQARUVI</span>
+          <p className="muted">Bir nechta banner qo‘shing. Faol bannerlar bosh sahifada navbat bilan avtomatik almashadi — eskisini o‘chirish shart emas.</p>
+        </div>
         <div className="row">
           <h3 style={{ margin: 0 }}>{editId ? "Banner tahrirlash" : "Yangi banner"}</h3>
           <span className="badge">SLIDER</span>
@@ -578,7 +582,7 @@ function Banners() {
       </div>
 
       <div className="row" style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: 0 }}>Bannerlar ro'yxati</h3>
+        <div><span className="eyebrow">KONTENT</span><h3 style={{ margin: "4px 0 0" }}>Bannerlar ro'yxati</h3></div>
         <button className="chip" onClick={load}>Yangilash ↻</button>
       </div>
       {loading && <LoadingView />}
