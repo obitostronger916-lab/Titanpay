@@ -61,12 +61,20 @@ async def create_payment(s: AsyncSession, user_id: int, amount: int, provider: s
 
 
 async def handle_provider_confirmation(s: AsyncSession, payment_id: str, provider_tx_id: str,
-                                       paid_amount: int) -> str:
-    """Provayder tasdiqlagan to'lovni qayta ishlaydi.
-    Aniq mos summa => avtomatik balansga. 1 UZS farq bo'lsa ham => 'mismatch' (qo'lda tekshiruv)."""
+                                       paid_amount: int, provider_name: str | None = None) -> str:
+    """Provayder to'lovini tekshiradi; shubhali yoki muddati o'tgan to'lov qo'lda ko'riladi."""
+    if not isinstance(provider_tx_id, str) or not provider_tx_id.strip() or len(provider_tx_id.strip()) > 128:
+        return "invalid_transaction"
+    if isinstance(paid_amount, bool) or not isinstance(paid_amount, int) or paid_amount <= 0:
+        return "invalid_amount"
+    provider_tx_id = provider_tx_id.strip()
+
     p = (await s.execute(select(Payment).where(Payment.id == payment_id).with_for_update())).scalar_one_or_none()
     if not p:
         return "not_found"
+    if provider_name is not None and p.provider != provider_name:
+        return "wrong_provider"
+
     # Bir tranzaksiya ikki marta hisoblanmasin
     used = await s.execute(select(Payment.id).where(Payment.provider_tx_id == provider_tx_id))
     owner = used.scalar_one_or_none()
@@ -74,8 +82,16 @@ async def handle_provider_confirmation(s: AsyncSession, payment_id: str, provide
         return "tx_already_used"
     if p.status != "created":
         return "already_processed"
+
     p.provider_tx_id = provider_tx_id
     p.paid_amount = paid_amount
+    expires_at = p.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if datetime.now(timezone.utc) > expires_at:
+        p.status = "review"
+        return "review"
+
     if paid_amount == p.expected_amount:
         await _apply(s, p.user_id, paid_amount, "topup", "payment", p.id)
         p.status = "credited"
