@@ -77,7 +77,9 @@ export default function App() {
     } else {
       document.documentElement.style.removeProperty("--shared-background-image");
     }
-    return () => document.documentElement.style.removeProperty("--shared-background-image");
+    return () => {
+      document.documentElement.style.removeProperty("--shared-background-image");
+    };
   }, [sharedBackground]);
 
   const activeBanner = banners.length ? banners[bannerIndex % banners.length] : null;
