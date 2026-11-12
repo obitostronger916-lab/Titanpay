@@ -86,7 +86,11 @@ class Order(Base):
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
     product_name: Mapped[str] = mapped_column(String(128))
     price: Mapped[int] = mapped_column(BigInteger)
-    game_nick: Mapped[str] = mapped_column(String(64))
+    game_nick: Mapped[str] = mapped_column(String(64))  # legacy field; mirrors character_name
+    client_id: Mapped[str | None] = mapped_column(String(64))
+    privacy_id: Mapped[str | None] = mapped_column(String(128))
+    character_name: Mapped[str | None] = mapped_column(String(64))
+    server_name: Mapped[str | None] = mapped_column(String(32))
     # pending|paid|queued|processing|delivered|error
     status: Mapped[str] = mapped_column(String(16), default="queued", index=True)
     delivery_result: Mapped[str | None] = mapped_column(Text)
