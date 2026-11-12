@@ -24,7 +24,12 @@ export default function Shop({
   const [items, setItems] = useState<Product[]>([]);
   const [cat, setCat] = useState("Hammasi");
   const [sel, setSel] = useState<Product | null>(null);
-  const [nick, setNick] = useState("");
+  const [clientId, setClientId] = useState("");
+  const [privacyId, setPrivacyId] = useState("");
+  const [characterName, setCharacterName] = useState("");
+  const [server, setServer] = useState("");
+  const [showHelp, setShowHelp] = useState(false);
+  const servers = ["LOMITA CIS", "HILLS CIS", "LYNWOOD CIS", "BELL CIS", "COVINA CIS", "GLENDALE CIS"];
   const [err, setErr] = useState("");
   const [done, setDone] = useState("");
   const [busy, setBusy] = useState(false);
@@ -48,8 +53,8 @@ export default function Shop({
   async function buy() {
     if (!sel || busy) return;
 
-    if (nick.trim().length < 2) {
-      setErr("O'yindagi nikni to'g'ri kiriting.");
+    if (!clientId.trim() || !privacyId.trim() || !characterName.trim() || !server) {
+      setErr("Barcha ONESTATE RP ma'lumotlarini to'ldiring.");
       return;
     }
 
@@ -59,12 +64,18 @@ export default function Shop({
     try {
       const o = await api<{ id: number }>("/api/orders", "POST", {
         product_id: sel.id,
-        game_nick: nick.trim(),
+        client_id: clientId.trim(),
+        privacy_id: privacyId.trim(),
+        character_name: characterName.trim(),
+        server,
       });
 
       setDone(`Buyurtma #${o.id} qabul qilindi`);
       setSel(null);
-      setNick("");
+      setClientId("");
+      setPrivacyId("");
+      setCharacterName("");
+      setServer("");
       refresh();
     } catch (e: any) {
       setErr(e?.message || "Xarid amalga oshmadi");
@@ -225,23 +236,24 @@ export default function Shop({
               </div>
             </div>
 
-            <label
-              style={{
-                display: "block",
-                fontSize: 13,
-                marginBottom: 8,
-                color: "var(--muted)",
-              }}
-            >
-              ONESTATE RP o'yinidagi nik
-            </label>
-
-            <input
-              placeholder="Masalan: Player_Name"
-              value={nick}
-              onChange={(e) => setNick(e.target.value)}
-              disabled={busy}
-            />
+            <div className="onestate-fields">
+              <div className="row" style={{ alignItems: "center", marginBottom: 10 }}>
+                <b>ONESTATE RP akkaunt ma'lumotlari</b>
+                <button type="button" className="text-action" onClick={() => setShowHelp((v) => !v)}>Qayerdan olinadi?</button>
+              </div>
+              {showHelp && <div className="msg">1. O'yinda Settings bo'limini oching.<br />2. Account yoki Profile bo'limiga kiring.<br />3. Client ID va Privacy ID ma'lumotlarini topib nusxalang.<br />4. Character name — tanlangan serverdagi personaj nomi.</div>}
+              <label>Client ID *</label>
+              <input placeholder="Client ID" value={clientId} onChange={(e) => setClientId(e.target.value)} disabled={busy} autoComplete="off" />
+              <label>Privacy ID *</label>
+              <input placeholder="Privacy ID" value={privacyId} onChange={(e) => setPrivacyId(e.target.value)} disabled={busy} autoComplete="off" />
+              <label>Character name *</label>
+              <input placeholder="O'yindagi personaj nomi" value={characterName} onChange={(e) => setCharacterName(e.target.value)} disabled={busy} autoComplete="off" />
+              <label>Server *</label>
+              <select value={server} onChange={(e) => setServer(e.target.value)} disabled={busy}>
+                <option value="">Serverni tanlang</option>
+                {servers.map((name) => <option key={name} value={name}>{name}</option>)}
+              </select>
+            </div>
 
             {err && <div className="err">{err}</div>}
 
@@ -258,7 +270,7 @@ export default function Shop({
             ) : (
               <button
                 className="btn"
-                disabled={busy || nick.trim().length < 2}
+                disabled={busy || !clientId.trim() || !privacyId.trim() || !characterName.trim() || !server}
                 onClick={buy}
               >
                 {busy ? "Buyurtma yuborilmoqda..." : "Xaridni tasdiqlash"}

@@ -11,6 +11,7 @@ from app.providers.base import ProviderNotConfigured
 from app.security import current_user
 from app.services import ledger
 from datetime import datetime, timezone
+from typing import Literal
 
 router = APIRouter(prefix="/api")
 
@@ -48,13 +49,20 @@ async def active_banners(s: AsyncSession = Depends(get_session), u=Depends(me)):
 
 class BuyIn(BaseModel):
     product_id: int
-    game_nick: str = Field(min_length=2, max_length=64)
+    client_id: str = Field(min_length=1, max_length=64)
+    privacy_id: str = Field(min_length=1, max_length=128)
+    character_name: str = Field(min_length=2, max_length=64)
+    server: Literal["LOMITA CIS", "HILLS CIS", "LYNWOOD CIS", "BELL CIS", "COVINA CIS", "GLENDALE CIS"]
 
 
 @router.post("/orders")
 async def buy(body: BuyIn, s: AsyncSession = Depends(get_session), u=Depends(me)):
     try:
-        o = await ledger.purchase(s, u.id, body.product_id, body.game_nick)
+        o = await ledger.purchase(
+            s, u.id, body.product_id, body.character_name,
+            client_id=body.client_id, privacy_id=body.privacy_id,
+            character_name=body.character_name, server=body.server,
+        )
         await s.commit()
     except ledger.LedgerError as e:
         await s.rollback()
@@ -67,7 +75,7 @@ async def my_orders(s: AsyncSession = Depends(get_session), u=Depends(me)):
     rows = (await s.execute(select(Order).where(Order.user_id == u.id)
                             .order_by(Order.created_at.desc()).limit(50))).scalars().all()
     return [{"id": o.id, "product": o.product_name, "price": o.price, "status": o.status,
-             "created_at": o.created_at.isoformat(), "result": o.delivery_result} for o in rows]
+             "created_at": o.created_at.isoformat(), "result": o.delivery_result,\n             "character_name": o.character_name or o.game_nick, "server": o.server_name} for o in rows]
 
 
 @router.get("/ledger")
