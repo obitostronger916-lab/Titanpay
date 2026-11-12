@@ -68,6 +68,17 @@ class Product(Base):
     delivery_payload: Mapped[str | None] = mapped_column(Text)  # API'ga yuboriladigan kod/miqdor
 
 
+class Banner(Base):
+    __tablename__ = "banners"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    title: Mapped[str] = mapped_column(String(120))
+    text: Mapped[str] = mapped_column(Text, default="")
+    image_url: Mapped[str | None] = mapped_column(String(1000))
+    target_url: Mapped[str | None] = mapped_column(String(1000))
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
 class Order(Base):
     __tablename__ = "orders"
     id: Mapped[str] = mapped_column(String(16), primary_key=True, default=new_id)
