@@ -6,7 +6,7 @@ class DeliveryNotConfigured(Exception):
 
 
 class DeliveryRetryable(Exception):
-    """Vaqtinchalik xato: buyurtma navbatda qoladi, keyinroq qayta uriniladi."""
+    """Yetkazish natijasi noaniq: avtomatik qayta yuborish xavfsiz emas."""
 
 
 @dataclass
