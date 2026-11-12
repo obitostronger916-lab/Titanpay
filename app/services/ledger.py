@@ -178,3 +178,24 @@ async def admin_requeue_order(s: AsyncSession, admin_id: int, order_id: str) -> 
     o.delivery_result = "Qayta navbatga olindi; summa balansdan qayta yechildi"
     await audit(s, admin_id, "order_requeue", o.id)
     return o.id
+
+
+
+async def resolve_order_review(s: AsyncSession, admin_id: int, order_id: str,
+                               action: str, note: str) -> str:
+    """Noaniq yetkazish natijasini admin tashqi serverda tekshirgach hal qiladi."""
+    o = (await s.execute(select(Order).where(Order.id == order_id).with_for_update())).scalar_one_or_none()
+    if not o or o.status != "review":
+        raise LedgerError("Faqat tekshiruvdagi buyurtmani hal qilish mumkin")
+    if action == "delivered":
+        o.status = "delivered"
+        o.delivery_result = f"Admin tekshirdi: yetkazilgan. {note}"
+        await audit(s, admin_id, "order_review_delivered", f"{o.id}: {note}")
+    elif action == "refund":
+        await _apply(s, o.user_id, o.price, "refund", "order", o.id, note)
+        o.status = "error"
+        o.delivery_result = f"Admin tekshirdi: pul qaytarildi. {note}"
+        await audit(s, admin_id, "order_review_refund", f"{o.id}: {note}")
+    else:
+        raise LedgerError("Noto'g'ri qaror")
+    return o.id
