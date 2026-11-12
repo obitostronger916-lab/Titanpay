@@ -11,6 +11,7 @@ const TABS = [
   "Support",
   "Audit",
   "Bannerlar",
+  "Dizayn",
 ];
 
 export default function Admin() {
@@ -44,6 +45,7 @@ export default function Admin() {
       {tab === TABS[5] && <Tickets />}
       {tab === TABS[6] && <Audit />}
       {tab === TABS[7] && <Banners />}
+      {tab === TABS[8] && <BackgroundSettings />}
     </>
   );
 }
@@ -835,5 +837,89 @@ function Audit() {
         <div className="card muted">Audit yozuvlari mavjud emas.</div>
       )}
     </>
+  );
+}
+
+
+function BackgroundSettings() {
+  const [imageData, setImageData] = useState<string | null>(null);
+  const [currentImage, setCurrentImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    api<{ background_image: string | null }>("/api/app-settings")
+      .then((result) => setCurrentImage(result.background_image || null))
+      .catch((e: any) => setError(e?.message || "Fon rasmi yuklanmadi"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  function chooseImage(file?: File) {
+    setError("");
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setError("Faqat JPG, PNG yoki WebP formatidagi rasmni tanlang.");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Rasm hajmi 2 MB dan oshmasligi kerak.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setImageData(String(reader.result));
+    reader.onerror = () => setError("Rasmni o'qib bo'lmadi.");
+    reader.readAsDataURL(file);
+  }
+
+  async function save() {
+    if (!imageData) return;
+    setBusy(true);
+    setError("");
+    try {
+      await api("/api/admin/settings/background", "PUT", { image_data: imageData });
+      setCurrentImage(imageData);
+      setImageData(null);
+      document.documentElement.style.setProperty("--shared-background-image", `url("${imageData}")`);
+      alert("Umumiy fon rasmi saqlandi. Barcha foydalanuvchilarga ko'rsatiladi.");
+    } catch (e: any) {
+      setError(e?.message || "Fon rasmini saqlab bo'lmadi.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove() {
+    if (!confirm("Umumiy fon rasmi olib tashlansinmi?")) return;
+    setBusy(true);
+    setError("");
+    try {
+      await api("/api/admin/settings/background", "DELETE");
+      setCurrentImage(null);
+      setImageData(null);
+      document.documentElement.style.removeProperty("--shared-background-image");
+    } catch (e: any) {
+      setError(e?.message || "Fon rasmini olib tashlab bo'lmadi.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const preview = imageData || currentImage;
+  return (
+    <div className="card background-settings-card">
+      <h3>Umumiy fon rasmi</h3>
+      <p className="muted">Bu yerga qo'yilgan rasm TITANPAY ilovasini ochgan barcha foydalanuvchilarga ko'rinadi.</p>
+      {loading ? <div className="muted">Yuklanmoqda...</div> : null}
+      {preview && <img className="shared-background-preview" src={preview} alt="Umumiy fon rasmi ko'rinishi" />}
+      <label className="background-file-label">
+        <span>Rasm tanlash (JPG, PNG, WebP · 2 MB gacha)</span>
+        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => chooseImage(e.target.files?.[0])} />
+      </label>
+      {imageData && <div className="muted">Yangi rasm tanlandi. Saqlash tugmasini bosing.</div>}
+      {error && <div className="err">{error}</div>}
+      <button className="btn" disabled={!imageData || busy} onClick={save}>{busy ? "Saqlanmoqda..." : "Barcha foydalanuvchilar uchun saqlash"}</button>
+      {currentImage && <button className="btn ghost" style={{ marginTop: 8 }} disabled={busy} onClick={remove}>Fon rasmini olib tashlash</button>}
+    </div>
   );
 }
