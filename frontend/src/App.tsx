@@ -21,10 +21,10 @@ const TILES: [string, string, string][] = [
 
 const BOTTOM_NAV: [string, string, string][] = [
   ["home", "⌂", "Bosh sahifa"],
-  ["shop", "🎮", "O‘yinlar"],
+  ["shop", "💎", "Donat do‘koni"],
   ["orders", "◷", "Tarix"],
   ["topup", "+", "To‘ldirish"],
-  ["profile", "☰", "Sozlamalar"],
+  ["profile", "👤", "Profil"],
 ];
 
 export default function App() {
@@ -198,7 +198,7 @@ export default function App() {
                   <span className="quick-icon">▤</span><span>Oxirgi xarid</span><small>Buyurtmalar</small>
                 </button>
                 <button className="quick-card" onClick={() => go("shop")}>
-                  <span className="quick-icon">★</span><span>TG Stars</span><small>Mahsulotlar</small>
+                  <span className="quick-icon">💎</span><span>ONESTATE donat</span><small>Donat paketlari</small>
                 </button>
                 <button className="quick-card" onClick={() => go("support")}>
                   <span className="quick-icon">⌁</span><span>Yordam</span><small>Support bilan aloqa</small>
@@ -208,7 +208,7 @@ export default function App() {
 
             <section className="section-block games-section">
               <div className="section-heading">
-                <div><span className="eyebrow">KATALOG</span><h2>O‘yinlar va xizmatlar</h2></div>
+                <div><span className="eyebrow">ONESTATE RP</span><h2>Donat paketlari</h2></div>
                 <button className="text-action" onClick={() => go("shop")}>Barchasi ↗</button>
               </div>
               <button className="game-card" onClick={() => go("shop")}>

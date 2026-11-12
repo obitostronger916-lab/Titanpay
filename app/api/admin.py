@@ -86,7 +86,7 @@ class ProductIn(BaseModel):
     description: str = ""
     price: int = Field(gt=0)
     image_url: str | None = None
-    category: str = "Umumiy"
+    category: str = "ONESTATE donat"
     in_stock: bool = True
     delivery_payload: str | None = None
 
