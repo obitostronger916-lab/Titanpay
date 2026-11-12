@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, field_validator
@@ -21,10 +22,12 @@ async def stats(s: AsyncSession = Depends(get_session)):
                               .where(Payment.status.in_(["credited", "mismatch_credited"])))).scalar()
     queued = (await s.execute(select(func.count(Order.id)).where(Order.status == "queued"))).scalar()
     delivered = (await s.execute(select(func.count(Order.id)).where(Order.status == "delivered"))).scalar()
+    orders_review = (await s.execute(select(func.count(Order.id)).where(Order.status == "review"))).scalar()
     review = (await s.execute(select(func.count(Payment.id)).where(Payment.status.in_(["mismatch", "review"])))).scalar()
     open_t = (await s.execute(select(func.count(Ticket.id)).where(Ticket.status == "open"))).scalar()
     return {"users": users, "topups_total": topups, "orders_queued": queued,
-            "orders_delivered": delivered, "payments_review": review, "tickets_open": open_t}
+            "orders_delivered": delivered, "orders_review": orders_review,
+            "payments_review": review, "tickets_open": open_t}
 
 
 @router.get("/users")
@@ -186,6 +189,23 @@ async def all_orders(status: str | None = None, s: AsyncSession = Depends(get_se
              "character_name": o.character_name or o.game_nick, "server": o.server_name,
              "status": o.status, "result": o.delivery_result}
             for o in (await s.execute(q)).scalars().all()]
+
+
+class OrderResolveIn(BaseModel):
+    action: Literal["delivered", "refund"]
+    note: str = Field(min_length=3, max_length=200)
+
+
+@router.post("/orders/{oid}/resolve")
+async def resolve_order(oid: str, body: OrderResolveIn, admin=Depends(admin_only),
+                        s: AsyncSession = Depends(get_session)):
+    try:
+        await ledger.resolve_order_review(s, admin["id"], oid, body.action, body.note)
+        await s.commit()
+    except ledger.LedgerError as e:
+        await s.rollback()
+        raise HTTPException(400, str(e))
+    return {"ok": True}
 
 
 @router.post("/orders/{oid}/requeue")
