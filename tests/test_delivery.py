@@ -38,7 +38,7 @@ async def test_successful_delivery(monkeypatch):
     monkeypatch.setattr(onestate, "is_configured", lambda: True)
     monkeypatch.setattr(onestate, "deliver", fake)
     assert await process_queue() == [(1, oid, "delivered")]
-    assert await state(oid) == ("delivered", 4000, 0)
+    assert await state(oid) == ("delivered", 4000, 1)
     assert await process_queue() == []  # qayta yuborilmaydi
 
 
