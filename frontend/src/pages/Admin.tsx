@@ -273,7 +273,10 @@ function Orders() {
             <div className="muted" style={{ marginTop: 10 }}>
               User: {o.user_id}
             </div>
-            <div className="muted">O'yin nik: {o.nick}</div>
+            <div className="muted">Character name: {o.character_name || o.nick}</div>
+            <div className="muted">Server: {o.server || "—"}</div>
+            <div className="muted">Client ID: {o.client_id || "—"}</div>
+            <div className="muted">Privacy ID: {o.privacy_id || "—"}</div>
 
             {o.result && (
               <div className="card" style={{ marginTop: 10 }}>
