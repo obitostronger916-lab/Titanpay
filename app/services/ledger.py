@@ -61,12 +61,21 @@ async def create_payment(s: AsyncSession, user_id: int, amount: int, provider: s
 
 
 async def handle_provider_confirmation(s: AsyncSession, payment_id: str, provider_tx_id: str,
-                                       paid_amount: int) -> str:
+                                       paid_amount: int, expected_provider: str | None = None) -> str:
     """Provayder tasdiqlagan to'lovni qayta ishlaydi.
     Aniq mos summa => avtomatik balansga. 1 UZS farq bo'lsa ham => 'mismatch' (qo'lda tekshiruv)."""
+    if not isinstance(provider_tx_id, str) or not provider_tx_id.strip() or len(provider_tx_id.strip()) > 128:
+        return "invalid_event"
+    provider_tx_id = provider_tx_id.strip()
+    if (isinstance(paid_amount, bool) or not isinstance(paid_amount, int)
+            or paid_amount <= 0 or paid_amount > 9_223_372_036_854_775_807):
+        return "invalid_amount"
+
     p = (await s.execute(select(Payment).where(Payment.id == payment_id).with_for_update())).scalar_one_or_none()
     if not p:
         return "not_found"
+    if expected_provider is not None and p.provider != expected_provider:
+        return "provider_mismatch"
     # Bir tranzaksiya ikki marta hisoblanmasin
     used = await s.execute(select(Payment.id).where(Payment.provider_tx_id == provider_tx_id))
     owner = used.scalar_one_or_none()
@@ -87,8 +96,10 @@ async def handle_provider_confirmation(s: AsyncSession, payment_id: str, provide
 async def admin_credit_mismatch(s: AsyncSession, admin_id: int, payment_id: str) -> str:
     """Admin tasdiqlagan noto'g'ri to'lov summasi ichki balansga qo'shiladi."""
     p = (await s.execute(select(Payment).where(Payment.id == payment_id).with_for_update())).scalar_one_or_none()
-    if not p or p.status not in ("mismatch", "review") or not p.paid_amount:
-        raise LedgerError("To'lov tekshiruv holatida emas")
+    if (not p or p.status not in ("mismatch", "review")
+            or isinstance(p.paid_amount, bool) or not isinstance(p.paid_amount, int)
+            or p.paid_amount <= 0):
+        raise LedgerError("To'lov tekshiruv holatida emas yoki summa noto'g'ri")
     await _apply(s, p.user_id, p.paid_amount, "mismatch_credit", "payment", p.id, "admin tasdiqladi")
     p.status = "mismatch_credited"
     await audit(s, admin_id, "mismatch_credit", f"{p.id}:{p.paid_amount}")
