@@ -1,3 +1,4 @@
+from sqlalchemy import inspect
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -21,3 +22,19 @@ async def init_db():
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+        def add_order_identity_columns(sync_conn):
+            columns = {column["name"] for column in inspect(sync_conn).get_columns("orders")}
+            additions = {
+                "client_id": "VARCHAR(64)",
+                "privacy_id": "VARCHAR(128)",
+                "character_name": "VARCHAR(64)",
+                "server_name": "VARCHAR(32)",
+            }
+            for name, sql_type in additions.items():
+                if name not in columns:
+                    sync_conn.exec_driver_sql(
+                        f"ALTER TABLE orders ADD COLUMN {name} {sql_type}"
+                    )
+
+        await conn.run_sync(add_order_identity_columns)
