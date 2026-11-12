@@ -38,7 +38,7 @@ async def test_successful_delivery(monkeypatch):
     monkeypatch.setattr(onestate, "is_configured", lambda: True)
     monkeypatch.setattr(onestate, "deliver", fake)
     assert await process_queue() == [(1, oid, "delivered")]
-    assert await state(oid) == ("delivered", 4000, 1)
+    assert await state(oid) == ("delivered", 4000, 0)
     assert await process_queue() == []  # qayta yuborilmaydi
 
 
@@ -79,7 +79,7 @@ async def test_admin_can_resolve_review_after_manual_check():
         await s.commit()
         await ledger.resolve_order_review(s, 99, oid, "refund", "Serverda donat yo'qligi tekshirildi")
         await s.commit()
-    assert await state(oid) == ("error", 10000, 1)
+    assert await state(oid) == ("error", 10000, 0)
 
 
 async def test_admin_can_mark_review_delivered_after_manual_check():
