@@ -450,3 +450,85 @@ input:focus, textarea:focus, select:focus {
 .promo-banner.has-image::after {
   background: linear-gradient(90deg, rgba(5,8,31,.88), rgba(9,12,46,.30));
 }
+
+
+/* TITANPAY clean black-and-white interface */
+:root {
+  --bg: #f3f3f3 !important;
+  --card: #ffffff !important;
+  --card2: #f5f5f5 !important;
+  --line: #d8d8d8 !important;
+  --gold: #111111 !important;
+  --gold2: #111111 !important;
+  --blue: #111111 !important;
+  --purple: #444444 !important;
+  --text: #111111 !important;
+  --muted: #666666 !important;
+  --red: #b42318 !important;
+  --green: #16794b !important;
+}
+html, body, #root { background: transparent !important; color: #111 !important; }
+html { background: #f3f3f3 !important; }
+body {
+  background: #f3f3f3 !important;
+  color: #111 !important;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--shared-background-image, none);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: .18;
+}
+#root { position: relative; z-index: 1; }
+.app-shell, .wrap, .app-content { background: transparent !important; color: #111 !important; }
+.card, .balance-card, .tile, .quick-card, .game-card, .sheet, .modal .sheet,
+.banner-manager-intro, .msg, .msg.admin, .promo-banner, .admin-shortcut,
+.back, .chip, .tabs .chip, .quick-grid > button {
+  background: #fff !important;
+  color: #111 !important;
+  border: 1px solid #d5d5d5 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.045) !important;
+}
+.btn, .primary-btn, .btn.ghost, .btn.red, .back, .promo-step {
+  background: #111 !important;
+  color: #fff !important;
+  border: 1px solid #111 !important;
+  box-shadow: none !important;
+}
+.btn:disabled { background: #777 !important; color: #fff !important; }
+input, textarea, select {
+  background: #fff !important;
+  color: #111 !important;
+  border: 1px solid #c9c9c9 !important;
+  box-shadow: none !important;
+}
+input:focus, textarea:focus, select:focus { border-color: #111 !important; outline: 1px solid #111 !important; }
+.price, .gold, .neon-text, .brand-name, .brand-name span, .splash-title,
+.section-heading h2, .game-info strong, .quick-card span, .online-pill,
+.promo-copy strong, .promo-copy small, .eyebrow, .text-action, .nav-item.active {
+  color: #111 !important;
+  background: none !important;
+  -webkit-text-fill-color: #111 !important;
+}
+.badge { color: #111 !important; background: #f1f1f1 !important; border-color: #ccc !important; }
+.bottom-nav { background: rgba(255,255,255,.97) !important; border-top: 1px solid #ddd !important; }
+.nav-item { color: #666 !important; }
+.nav-item.active { color: #111 !important; }
+.promo-banner::after { background: linear-gradient(90deg,rgba(255,255,255,.94),rgba(255,255,255,.45)) !important; }
+.promo-banner .promo-image { opacity: .25 !important; }
+.promo-banner .promo-arrow, .promo-orb, .avatar-chip, .game-icon, .quick-icon { color: #111 !important; }
+.splash-screen, .loading-screen, .error-screen { background: #f3f3f3 !important; color: #111 !important; }
+.brand-mark { background: #111 !important; color: #fff !important; box-shadow: none !important; }
+.online-pill { border-color: #ccc !important; background: #fff !important; }
+.online-pill i { background: #111 !important; }
+.modal { background: rgba(0,0,0,.55) !important; }
+.shared-background-preview { display:block; width:100%; max-height:220px; object-fit:cover; border-radius:10px; border:1px solid #ccc; margin:12px 0; }
+.background-file-label { display:block; margin:14px 0; color:#222; font-size:13px; }
+.background-file-label span { display:block; margin-bottom:8px; font-weight:600; }
+.background-file-label input { padding:10px; }
