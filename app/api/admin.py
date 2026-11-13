@@ -292,9 +292,9 @@ class BackgroundIn(BaseModel):
             raise ValueError("Rasm hajmi 2 MB dan oshmasligi kerak")
 
         if prefix == "data:image/jpeg;base64,":
-            valid_signature = image_bytes.startswith(b"\\xff\\xd8\\xff")
+            valid_signature = image_bytes.startswith(b"\xff\xd8\xff")
         elif prefix == "data:image/png;base64,":
-            valid_signature = image_bytes.startswith(b"\\x89PNG\\r\\n\\x1a\\n")
+            valid_signature = image_bytes.startswith(b"\x89PNG\r\n\x1a\n")
         else:
             valid_signature = (
                 len(image_bytes) >= 12
