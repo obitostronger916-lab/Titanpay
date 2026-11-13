@@ -1,6 +1,6 @@
-
 import { useEffect, useState } from "react";
 import { api, STATUS_UZ } from "../api";
+import { Icon } from "../icons";
 
 type Ticket = {
   id: string;
@@ -73,45 +73,39 @@ export default function Support({
 
   return (
     <>
-      <div style={{ marginBottom: 18 }}>
-        <div className="muted">TITAN DONAT • ONESTATE RP</div>
-        <h2 style={{ margin: "5px 0" }}>Yordam markazi</h2>
+      <div className="mb-l">
+        <div className="eyebrow">TITAN DONAT • ONESTATE RP</div>
+        <h2 className="mt-s mb-s">Yordam markazi</h2>
         <div className="muted">
           Savol yoki muammo bo'lsa, admin bilan bog'laning.
         </div>
       </div>
 
-      <div
-        className="card"
-        style={{
-          background:
-            "linear-gradient(130deg,rgba(54,185,255,.13),rgba(145,108,255,.12))",
-        }}
-      >
+      <div className="card soft">
         <div className="row">
           <div>
-            <div className="muted">TITAN SUPPORT</div>
-            <h3 style={{ margin: "5px 0" }}>Biz sizga yordam beramiz</h3>
+            <div className="eyebrow">TITAN SUPPORT</div>
+            <h3 className="mt-s mb-s">Biz sizga yordam beramiz</h3>
           </div>
-          <span style={{ fontSize: 34 }}>🛡️</span>
+          <Icon name="support" size={32} />
         </div>
 
-        <p className="muted" style={{ marginBottom: 0 }}>
+        <p className="muted m0">
           Murojaatingizni yozing. Javob kelganda shu sahifada ko'rishingiz mumkin.
         </p>
       </div>
 
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Yangi murojaat</h3>
+        <h3>Yangi murojaat</h3>
 
         {ctx?.payment_id && (
-          <div className="badge" style={{ marginBottom: 12 }}>
+          <div className="badge mb-m">
             To'lov #{ctx.payment_id}
           </div>
         )}
 
         {ctx?.order_id && (
-          <div className="badge" style={{ marginBottom: 12 }}>
+          <div className="badge mb-m">
             Buyurtma #{ctx.order_id}
           </div>
         )}
@@ -125,7 +119,7 @@ export default function Support({
           disabled={busy}
         />
 
-        <div className="row muted" style={{ margin: "8px 0 12px" }}>
+        <div className="row muted mb-m">
           <span>Kamida 3 ta belgi</span>
           <span>{text.length}/2000</span>
         </div>
@@ -137,22 +131,20 @@ export default function Support({
           disabled={busy || text.trim().length < 3}
           onClick={create}
         >
-          {busy ? "Yuborilmoqda..." : "✉️ Murojaat yuborish"}
+          <Icon name="message" size={18} /> {busy ? "Yuborilmoqda..." : "Murojaat yuborish"}
         </button>
       </div>
 
-      <div className="row" style={{ margin: "22px 0 12px" }}>
-        <h3 style={{ margin: 0 }}>Murojaatlarim</h3>
+      <div className="row mt-l mb-m">
+        <h3 className="m0">Murojaatlarim</h3>
         <span className="badge">{tickets.length} ta</span>
       </div>
 
       {tickets.length === 0 && (
-        <div className="card" style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 32 }}>💬</div>
+        <div className="card state">
+          <div className="state-icon"><Icon name="message" size={22} /></div>
           <b>Murojaatlar mavjud emas</b>
-          <p className="muted" style={{ marginBottom: 0 }}>
-            Yangi murojaat yuborsangiz, shu yerda ko'rinadi.
-          </p>
+          <p>Yangi murojaat yuborsangiz, shu yerda ko'rinadi.</p>
         </div>
       )}
 
@@ -160,37 +152,28 @@ export default function Support({
         <div className="card" key={t.id}>
           <div className="row">
             <b>MUROJAAT #{t.id}</b>
-            <span className="badge">
+            <span className="badge" data-status={t.status}>
               {STATUS_UZ[t.status] || t.status}
             </span>
           </div>
 
-          <div
-            style={{
-              height: 1,
-              background: "var(--line)",
-              margin: "14px 0",
-            }}
-          />
+          <div className="divider" />
 
-          <div style={{ display: "grid", gap: 10 }}>
+          <div className="msgs" style={{ marginTop: 0 }}>
             {(t.messages || []).map((m, i) => (
               <div
                 key={i}
                 className={`msg ${m.admin ? "admin" : ""}`}
               >
-                <div
-                  className="muted"
-                  style={{ fontSize: 11, marginBottom: 5 }}
-                >
-                  {m.admin ? "🛡️ ADMIN" : "SIZ"}
+                <div className="muted" style={{ fontSize: 11, marginBottom: 5 }}>
+                  {m.admin ? "ADMIN" : "SIZ"}
                 </div>
                 {m.text}
               </div>
             ))}
           </div>
 
-          <div style={{ marginTop: 16 }}>
+          <div className="mt-l">
             <input
               placeholder="Javob yozing..."
               value={reply[t.id] || ""}
@@ -204,7 +187,6 @@ export default function Support({
 
             <button
               className="btn ghost small"
-              style={{ marginTop: 10 }}
               disabled={!(reply[t.id] || "").trim()}
               onClick={() => send(t.id)}
             >
