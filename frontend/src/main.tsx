@@ -1,4 +1,3 @@
-
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
@@ -22,8 +21,8 @@ class Boundary extends React.Component<
         <div
           style={{
             padding: 16,
-            color: "#fff",
-            background: "#060b1c",
+            color: "#0a0a0a",
+            background: "#f5f5f5",
             minHeight: "100vh",
             fontFamily: "sans-serif",
           }}
