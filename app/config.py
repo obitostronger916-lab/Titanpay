@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     PAYMENT_WEBHOOK_SECRET: str = ""
     ONESTATE_API_URL: str = ""
     ONESTATE_API_KEY: str = ""
+    ONESTATE_DELIVERY_ENABLED: bool = False
     PAYMENT_TTL_MINUTES: int = 20
     INITDATA_MAX_AGE: int = 86400
     RUN_BOT: bool = False  # True bo'lsa bot web servis ichida ishlaydi
