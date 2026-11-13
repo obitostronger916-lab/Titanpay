@@ -198,8 +198,14 @@ async def run_bot():
     async def on_delivery(user_id: int, order_id: str, status: str):
         if status == "delivered":
             await safe_send(bot, user_id, f"🎉 Buyurtma #{order_id} yetkazildi!")
+        elif status == "review":
+            await safe_send(
+                bot, user_id,
+                f"⚠️ Buyurtma #{order_id} natijasi noaniq. Takroriy donat yuborilmadi. "
+                "Admin ONESTATE serverida tekshiradi; hozircha pul balansga qaytarilmadi."
+            )
         else:
-            await safe_send(bot, user_id, f"❌ Buyurtma #{order_id} bajarilmadi. Pul balansga qaytariladi.")
+            await safe_send(bot, user_id, f"❌ Buyurtma #{order_id} bajarilmadi. Pul balansga qaytarildi.")
 
     tasks = [asyncio.create_task(delivery_loop(on_delivery)),
              asyncio.create_task(notify_loop(bot))]

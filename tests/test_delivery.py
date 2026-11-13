@@ -54,13 +54,40 @@ async def test_failed_delivery_refunds(monkeypatch):
     assert await state(oid) == ("error", 10000, 1)
 
 
-async def test_temporary_error_keeps_order_queued(monkeypatch):
+async def test_ambiguous_error_moves_order_to_review_without_retry(monkeypatch):
     oid = await make_order()
+    calls = 0
 
     async def fake(order_id, nick, payload):
+        nonlocal calls
+        calls += 1
         raise DeliveryRetryable("timeout")
 
     monkeypatch.setattr(onestate, "is_configured", lambda: True)
     monkeypatch.setattr(onestate, "deliver", fake)
+    assert await process_queue() == [(1, oid, "review")]
+    assert await state(oid) == ("review", 4000, 1)
     assert await process_queue() == []
-    assert await state(oid) == ("queued", 4000, 1)
+    assert calls == 1
+
+
+async def test_admin_can_resolve_review_after_manual_check():
+    oid = await make_order()
+    async with SessionLocal() as s:
+        order = await s.get(Order, oid)
+        order.status = "review"
+        await s.commit()
+        await ledger.resolve_order_review(s, 99, oid, "refund", "Serverda donat yo'qligi tekshirildi")
+        await s.commit()
+    assert await state(oid) == ("error", 10000, 0)
+
+
+async def test_admin_can_mark_review_delivered_after_manual_check():
+    oid = await make_order()
+    async with SessionLocal() as s:
+        order = await s.get(Order, oid)
+        order.status = "review"
+        await s.commit()
+        await ledger.resolve_order_review(s, 99, oid, "delivered", "Serverda donat borligi tekshirildi")
+        await s.commit()
+    assert await state(oid) == ("delivered", 4000, 0)
