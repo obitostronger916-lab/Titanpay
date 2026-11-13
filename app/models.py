@@ -91,7 +91,7 @@ class Order(Base):
     privacy_id: Mapped[str | None] = mapped_column(String(128))
     character_name: Mapped[str | None] = mapped_column(String(64))
     server_name: Mapped[str | None] = mapped_column(String(32))
-    # pending|paid|queued|processing|delivered|error
+    # pending|paid|queued|processing|review|delivered|error
     status: Mapped[str] = mapped_column(String(16), default="queued", index=True)
     delivery_result: Mapped[str | None] = mapped_column(Text)
     attempts: Mapped[int] = mapped_column(Integer, default=0)
