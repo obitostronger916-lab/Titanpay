@@ -89,7 +89,7 @@ export default function App() {
 
   useEffect(() => {
     if (sharedBackground) {
-      document.documentElement.style.setProperty("--shared-background-image", \`url("\${sharedBackground}")\`);
+      document.documentElement.style.setProperty("--shared-background-image", `url("${sharedBackground}")`);
     } else {
       document.documentElement.style.removeProperty("--shared-background-image");
     }
@@ -244,14 +244,14 @@ export default function App() {
                 onPointerCancel={onBannerCancel}
               >
                 <div
-                  className={\`promo-track \${dragging ? "dragging" : ""}\`}
-                  style={{ transform: \`translateX(calc(\${-current * 100}% + \${dragX}px))\` }}
+                  className={`promo-track ${dragging ? "dragging" : ""}`}
+                  style={{ transform: `translateX(calc(${-current * 100}% + ${dragX}px))` }}
                 >
                   {slides.map((b, i) => (
                     <div className="promo-slide" key={b?.id ?? i}>
                       <button
                         type="button"
-                        className={\`promo-banner \${b?.image_url ? "has-image" : ""}\`}
+                        className={`promo-banner ${b?.image_url ? "has-image" : ""}`}
                         onClick={() => openBanner(b)}
                       >
                         {b?.image_url && (
@@ -342,7 +342,7 @@ export default function App() {
 
       <nav className="bottom-nav" aria-label="Asosiy navigatsiya">
         {BOTTOM_NAV.map(([key, icon, label]) => (
-          <button key={key} className={\`nav-item \${page === key ? "active" : ""}\`} onClick={() => go(key)}>
+          <button key={key} className={`nav-item ${page === key ? "active" : ""}`} onClick={() => go(key)}>
             <span className="nav-icon"><Icon name={icon} size={22} /></span><span>{label}</span>
           </button>
         ))}
