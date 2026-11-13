@@ -1,6 +1,8 @@
 
 import { useEffect, useState } from "react";
 import { api, fmt, STATUS_UZ } from "../api";
+import { Icon } from "../icons";
+import type { IconName } from "../icons";
 
 const TABS = [
   "Statistika",
@@ -19,13 +21,13 @@ export default function Admin() {
 
   return (
     <>
-      <div style={{ marginBottom: 18 }}>
-        <div className="muted">ONESTATE ROLEPLAY</div>
-        <h2 style={{ margin: "5px 0" }}>Admin panel</h2>
+      <div className="admin-head">
+        <div className="eyebrow">ONESTATE ROLEPLAY</div>
+        <h2 className="mt-s mb-s">Admin panel</h2>
         <div className="muted">TITAN DONAT boshqaruv markazi</div>
       </div>
 
-      <div className="tabs" style={{ marginBottom: 18 }}>
+      <div className="tabs">
         {TABS.map((t) => (
           <button
             key={t}
@@ -82,7 +84,7 @@ function ErrorView({ message }: { message: string }) {
 }
 
 function LoadingView() {
-  return <div className="card muted">Ma'lumotlar yuklanmoqda...</div>;
+  return <div className="card state"><div className="loading-line" style={{ margin: "0 auto 10px" }}><span /></div>Ma'lumotlar yuklanmoqda...</div>;
 }
 
 async function act(fn: () => Promise<any>, after: () => void) {
@@ -101,27 +103,27 @@ function Stats() {
   if (err) return <ErrorView message={err} />;
   if (!data) return null;
 
-  const rows: [string, any, string][] = [
-    ["Foydalanuvchilar", data.users, "👥"],
-    ["Jami to'ldirilgan", fmt(data.topups_total), "💳"],
-    ["Navbatdagi buyurtmalar", data.orders_queued, "📦"],
-    ["Yetkazilgan buyurtmalar", data.orders_delivered, "✅"],
-    ["Tekshiruvdagi donatlar", data.orders_review, "🔎"],
-    ["Tekshiruvdagi to'lovlar", data.payments_review, "💳"],
-    ["Ochiq murojaatlar", data.tickets_open, "💬"],
+  const rows: [string, any, IconName][] = [
+    ["Foydalanuvchilar", data.users, "users"],
+    ["Jami to'ldirilgan", fmt(data.topups_total), "card"],
+    ["Navbatdagi buyurtmalar", data.orders_queued, "box"],
+    ["Yetkazilgan buyurtmalar", data.orders_delivered, "check"],
+    ["Tekshiruvdagi donatlar", data.orders_review, "search"],
+    ["Tekshiruvdagi to'lovlar", data.payments_review, "card"],
+    ["Ochiq murojaatlar", data.tickets_open, "message"],
   ];
 
   return (
     <>
-      <div className="row" style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: 0 }}>Umumiy statistika</h3>
-        <button className="chip" onClick={load}>Yangilash ↻</button>
+      <div className="row mb-m">
+        <h3 className="m0">Umumiy statistika</h3>
+        <button className="chip" onClick={load}><Icon name="refresh" size={16} /> Yangilash</button>
       </div>
 
       {rows.map(([name, value, icon]) => (
         <div className="card row" key={name}>
           <div className="row" style={{ gap: 12 }}>
-            <span style={{ fontSize: 24 }}>{icon}</span>
+            <span className="list-icon"><Icon name={icon} /></span>
             <span className="muted">{name}</span>
           </div>
           <b className="price">{value ?? 0}</b>
@@ -165,7 +167,7 @@ function Payments() {
           <div className="card" key={p.id}>
             <div className="row">
               <b>TO'LOV #{p.id}</b>
-              <span className="badge">
+              <span className="badge" data-status={p.status}>
                 {STATUS_UZ[p.status] || p.status}
               </span>
             </div>
@@ -266,7 +268,7 @@ function Orders() {
           <div className="card" key={o.id}>
             <div className="row">
               <b>BUYURTMA #{o.id}</b>
-              <span className="badge">
+              <span className="badge" data-status={o.status}>
                 {STATUS_UZ[o.status] || o.status}
               </span>
             </div>
@@ -588,9 +590,9 @@ function Banners() {
         {editId && <button className="btn ghost" style={{ marginTop: 8 }} onClick={reset}>Bekor qilish</button>}
       </div>
 
-      <div className="row" style={{ marginBottom: 12 }}>
-        <div><span className="eyebrow">KONTENT</span><h3 style={{ margin: "4px 0 0" }}>Bannerlar ro'yxati</h3></div>
-        <button className="chip" onClick={load}>Yangilash ↻</button>
+      <div className="row mb-m">
+        <div><span className="eyebrow">KONTENT</span><h3 className="mt-s m0">Bannerlar ro'yxati</h3></div>
+        <button className="chip" onClick={load}><Icon name="refresh" size={16} /> Yangilash</button>
       </div>
       {loading && <LoadingView />}
       {err && <ErrorView message={err} />}
@@ -599,7 +601,7 @@ function Banners() {
           {b.image_url && <img className="banner-admin-image" src={b.image_url} alt={b.title} />}
           <div className="row">
             <b>{b.title}</b>
-            <span className={`badge ${b.enabled ? "" : "muted"}`}>{b.enabled ? "Faol" : "O'chirilgan"}</span>
+            <span className={`badge ${b.enabled ? "on" : "off"}`}>{b.enabled ? "Faol" : "O'chirilgan"}</span>
           </div>
           {b.text && <p className="muted">{b.text}</p>}
           {b.target_url && <div className="muted" style={{ overflowWrap: "anywhere" }}>{b.target_url}</div>}
@@ -815,9 +817,9 @@ function Audit() {
 
   return (
     <>
-      <div className="row">
-        <h3>Amallar tarixi</h3>
-        <button className="chip" onClick={load}>Yangilash ↻</button>
+      <div className="row mb-m">
+        <h3 className="m0">Amallar tarixi</h3>
+        <button className="chip" onClick={load}><Icon name="refresh" size={16} /> Yangilash</button>
       </div>
 
       {loading && <LoadingView />}
