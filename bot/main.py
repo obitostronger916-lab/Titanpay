@@ -38,11 +38,11 @@ async def start(m: Message):
         u = await ledger.get_or_create_user(s, tg_dict(m))
         await s.commit()
     if u.is_banned:
-        return await m.answer("Siz bloklangansiz.")
+        return await m.answer("Hisobingizdan foydalanish cheklangan. Yordam uchun supportga murojaat qiling.")
     await m.answer(
-        "👑 TITAN DONAT — ONESTATE RP\n\n"
-        "Balansni to'ldiring, donat xarid qiling va buyurtmalarni kuzating.\n\n"
-        "/balance — balans\n/orders — buyurtmalar\n/support matn — support bilan bog'lanish",
+        "Assalomu alaykum! ONESTATE RP donat xizmatiga xush kelibsiz.\n\n"
+        "Mini ilova orqali donat paketlarini ko'rishingiz, buyurtma berishingiz va holatini kuzatishingiz mumkin.\n\n"
+        "/balance — balansingiz\n/orders — buyurtmalar tarixi\n/support matn — yordam xizmatiga yozish",
         reply_markup=app_kb())
 
 
@@ -60,7 +60,7 @@ async def orders(m: Message):
         rows = (await s.execute(select(Order).where(Order.user_id == m.from_user.id)
                                 .order_by(Order.created_at.desc()).limit(10))).scalars().all()
     if not rows:
-        return await m.answer("Buyurtmalar yo'q.")
+        return await m.answer("Hozircha buyurtmalaringiz yo‘q.")
     await m.answer("\n".join(
         f"#{o.id} — {o.product_name} — {STATUS_UZ.get(o.status, o.status)}" for o in rows))
 
@@ -88,7 +88,7 @@ async def support(m: Message, command: CommandObject, bot: Bot):
         await s.flush()
         s.add(TicketMessage(ticket_id=t.id, from_admin=False, text=text))
         await s.commit()
-    await m.answer(f"✅ Murojaat qabul qilindi. ID: {t.id}")
+    await m.answer(f"Murojaatingiz qabul qilindi. Raqami: {t.id}")
     if settings.ADMIN_ID:
         try:
             await bot.send_message(settings.ADMIN_ID,
@@ -114,7 +114,7 @@ async def admin_reply(m: Message, command: CommandObject):
         t.status = "answered"
         await ledger.audit(s, m.from_user.id, "ticket_reply", t.id)
         await s.commit()
-    await m.answer("✅ Javob yuborildi.")
+    await m.answer("Javob yuborildi.")
 
 
 async def safe_send(bot: Bot, chat_id: int, text: str):
@@ -197,15 +197,15 @@ async def run_bot():
 
     async def on_delivery(user_id: int, order_id: str, status: str):
         if status == "delivered":
-            await safe_send(bot, user_id, f"🎉 Buyurtma #{order_id} yetkazildi!")
+            await safe_send(bot, user_id, f"Buyurtma #{order_id} o‘yin ichiga yetkazildi.")
         elif status == "review":
             await safe_send(
                 bot, user_id,
-                f"⚠️ Buyurtma #{order_id} natijasi noaniq. Takroriy donat yuborilmadi. "
-                "Admin ONESTATE serverida tekshiradi; hozircha pul balansga qaytarilmadi."
+                f"Buyurtma #{order_id} bo‘yicha yetkazish holati aniqlanmadi. "
+                "Takroriy yuborishning oldini olish uchun buyurtma tekshiruvga olindi. Admin natijani tekshiradi; mablag‘ hozircha balansga qaytarilmadi."
             )
         else:
-            await safe_send(bot, user_id, f"❌ Buyurtma #{order_id} bajarilmadi. Pul balansga qaytarildi.")
+            await safe_send(bot, user_id, f"Buyurtma #{order_id} bajarilmadi. Mablag‘ balansingizga qaytarildi.")
 
     tasks = [asyncio.create_task(delivery_loop(on_delivery)),
              asyncio.create_task(notify_loop(bot))]
