@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import { api, tg, fmt } from "./api";
+import { Icon } from "./icons";
+import type { IconName } from "./icons";
 import Shop from "./pages/Shop";
 import Topup from "./pages/Topup";
 import { Balance, Orders, Profile, Rules } from "./pages/Simple";
@@ -9,23 +12,25 @@ import Admin from "./pages/Admin";
 export type Me = { id: number; name: string; balance: number; is_admin: boolean };
 export type Nav = (page: string, ctx?: any) => void;
 
-const TILES: [string, string, string][] = [
-  ["shop", "🛒", "Donat do‘koni"],
-  ["balance", "💳", "Balans"],
-  ["topup", "➕", "Balansni to‘ldirish"],
-  ["orders", "🧾", "Buyurtmalar"],
-  ["profile", "👤", "Profil"],
-  ["support", "🎧", "Yordam"],
-  ["rules", "📋", "Qoidalar"],
+const TILES: [string, IconName, string][] = [
+  ["shop", "shop", "Donat do‘koni"],
+  ["balance", "wallet", "Balans"],
+  ["topup", "plus", "Balansni to‘ldirish"],
+  ["orders", "orders", "Buyurtmalar"],
+  ["profile", "user", "Profil"],
+  ["support", "support", "Yordam"],
+  ["rules", "rules", "Qoidalar"],
 ];
 
-const BOTTOM_NAV: [string, string, string][] = [
-  ["home", "⌂", "Bosh sahifa"],
-  ["shop", "💎", "Donat do‘koni"],
-  ["orders", "◷", "Tarix"],
-  ["topup", "+", "To‘ldirish"],
-  ["profile", "👤", "Profil"],
+const BOTTOM_NAV: [string, IconName, string][] = [
+  ["home", "home", "Bosh sahifa"],
+  ["shop", "shop", "Do‘kon"],
+  ["orders", "history", "Tarix"],
+  ["topup", "plus", "To‘ldirish"],
+  ["profile", "user", "Profil"],
 ];
+
+const SWIPE_MIN = 40;
 
 export default function App() {
   const [me, setMe] = useState<Me | null>(null);
@@ -35,7 +40,9 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [banners, setBanners] = useState<any[]>([]);
   const [bannerIndex, setBannerIndex] = useState(0);
-  const bannerTouchStart = useRef<number | null>(null);
+  const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const bannerStart = useRef<{ x: number; y: number } | null>(null);
   const bannerWasSwiped = useRef(false);
   const [sharedBackground, setSharedBackground] = useState<string | null>(null);
 
@@ -51,6 +58,12 @@ export default function App() {
   useEffect(() => {
     tg?.ready();
     tg?.expand();
+    try {
+      if (tg?.isVersionAtLeast?.("6.9")) {
+        tg.setHeaderColor?.("#f5f5f5");
+        tg.setBackgroundColor?.("#f5f5f5");
+      }
+    } catch {}
     refresh();
   }, [refresh]);
 
@@ -65,17 +78,18 @@ export default function App() {
     }).catch(() => setBanners([]));
   }, [me]);
 
+  // Avtomatik almashish: barmoq tegib turganda to'xtaydi, surishdan keyin qayta sanaladi.
   useEffect(() => {
-    if (banners.length < 2) return;
-    const timer = window.setInterval(() => {
+    if (banners.length < 2 || dragging) return;
+    const timer = window.setTimeout(() => {
       setBannerIndex((current) => (current + 1) % banners.length);
     }, 5000);
-    return () => window.clearInterval(timer);
-  }, [banners.length]);
+    return () => window.clearTimeout(timer);
+  }, [banners.length, bannerIndex, dragging]);
 
   useEffect(() => {
     if (sharedBackground) {
-      document.documentElement.style.setProperty("--shared-background-image", `url("${sharedBackground}")`);
+      document.documentElement.style.setProperty("--shared-background-image", \`url("\${sharedBackground}")\`);
     } else {
       document.documentElement.style.removeProperty("--shared-background-image");
     }
@@ -84,18 +98,58 @@ export default function App() {
     };
   }, [sharedBackground]);
 
-  const activeBanner = banners.length ? banners[bannerIndex % banners.length] : null;
-  const changeBanner = (direction: number) => setBannerIndex((current) => (current + direction + banners.length) % banners.length);
+  const current = banners.length ? bannerIndex % banners.length : 0;
+  const slides: any[] = banners.length ? banners : [null];
+  const changeBanner = (direction: number) =>
+    setBannerIndex((c) => (c + direction + banners.length) % banners.length);
 
-  const openBanner = () => {
+  const openBanner = (banner: any) => {
     if (bannerWasSwiped.current) {
       bannerWasSwiped.current = false;
       return;
     }
-    if (activeBanner?.target_url) {
-      if (tg?.openLink) tg.openLink(activeBanner.target_url);
-      else window.open(activeBanner.target_url, "_blank", "noopener,noreferrer");
+    if (banner?.target_url) {
+      if (tg?.openLink) tg.openLink(banner.target_url);
+      else window.open(banner.target_url, "_blank", "noopener,noreferrer");
     }
+  };
+
+  const onBannerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 || banners.length < 2) return;
+    bannerStart.current = { x: e.clientX, y: e.clientY };
+    bannerWasSwiped.current = false;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const onBannerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const start = bannerStart.current;
+    if (!start || banners.length < 2) return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    if (!dragging) {
+      if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) setDragging(true);
+      else return;
+    }
+    setDragX(dx);
+  };
+
+  const onBannerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const start = bannerStart.current;
+    bannerStart.current = null;
+    if (!start) return;
+    if (dragging) {
+      const dx = e.clientX - start.x;
+      bannerWasSwiped.current = true;
+      if (Math.abs(dx) > SWIPE_MIN) changeBanner(dx < 0 ? 1 : -1);
+    }
+    setDragging(false);
+    setDragX(0);
+  };
+
+  const onBannerCancel = () => {
+    bannerStart.current = null;
+    setDragging(false);
+    setDragX(0);
   };
 
   useEffect(() => {
@@ -119,10 +173,10 @@ export default function App() {
     return (
       <div className="wrap error-screen">
         <div className="brand-mark small-mark">T</div>
-        <h2 className="neon-text">TITANPAY</h2>
+        <h2>TITANPAY</h2>
         <p className="err">{error}</p>
         <p className="muted">Mini App’ni Telegram bot ichidagi tugma orqali oching.</p>
-        <button className="primary-btn" onClick={refresh}>Qayta urinish</button>
+        <button className="btn small" onClick={refresh}>Qayta urinish</button>
       </div>
     );
   }
@@ -143,7 +197,7 @@ export default function App() {
         <div className="logo-stage"><div className="brand-mark splash-mark">T</div></div>
         <div className="splash-title">TITANPAY</div>
         <div className="splash-subtitle">ONESTATE RP DONAT XIZMATI</div>
-        <div className="loading-line splash-loading"><span /></div>
+        <div className="loading-line"><span /></div>
       </div>
     );
   }
@@ -151,113 +205,145 @@ export default function App() {
   return (
     <div className="app-shell">
       <main className="wrap app-content">
-        {page === "home" ? (
-          <>
-            <header className="home-header">
-              <div className="brand-lockup">
-                <div className="brand-mark header-mark">T</div>
-                <div>
-                  <div className="brand-name">TITAN<span>PAY</span></div>
-                  <div className="muted brand-caption">ONESTATE ROLEPLAY</div>
+        <div className="page" key={page}>
+          {page === "home" ? (
+            <>
+              <header className="home-header">
+                <div className="brand-lockup">
+                  <div className="brand-mark header-mark">T</div>
+                  <div>
+                    <div className="brand-name">TITAN<span>PAY</span></div>
+                    <div className="muted brand-caption">ONESTATE ROLEPLAY</div>
+                  </div>
                 </div>
-              </div>
-              <div className="online-pill">ONESTATE RP</div>
-            </header>
+                <div className="online-pill">ONESTATE RP</div>
+              </header>
 
-            <section className="welcome-row">
-              <div>
-                <div className="muted">Xush kelibsiz,</div>
-                <h1>{me.name || "O‘yinchi"}!</h1>
-              </div>
-              <div className="avatar-chip">⚡</div>
-            </section>
+              <section className="welcome-row">
+                <div>
+                  <div className="muted">Xush kelibsiz,</div>
+                  <h1>{me.name || "O‘yinchi"}!</h1>
+                </div>
+                <div className="avatar-chip"><Icon name="user" /></div>
+              </section>
 
-            <div
-              className="promo-slider"
-              onTouchStart={(event) => {
-                bannerTouchStart.current = event.touches[0]?.clientX ?? null;
-                bannerWasSwiped.current = false;
-              }}
-              onTouchEnd={(event) => {
-                if (bannerTouchStart.current === null || banners.length < 2) return;
-                const distance = event.changedTouches[0].clientX - bannerTouchStart.current;
-                if (Math.abs(distance) > 45) {
-                  bannerWasSwiped.current = true;
-                  changeBanner(distance < 0 ? 1 : -1);
-                }
-                bannerTouchStart.current = null;
-              }}
-            >
-              <button className={`promo-banner ${activeBanner?.image_url ? "has-image" : ""}`} onClick={openBanner}>
-                {activeBanner?.image_url && <img className="promo-image" src={activeBanner.image_url} alt={activeBanner.title} />}
-                <span className="promo-orb">✦</span>
-                <span className="promo-copy">
-                  <small>{activeBanner?.title || "ONESTATE RP"}</small>
-                  <strong>{activeBanner?.text || "Donat paketlari va xizmatlar"}</strong>
-                  {activeBanner?.target_url && <em>Batafsil</em>}
-                </span>
-                <span className="promo-arrow">›</span>
-              </button>
-            </div>
+              <section className="balance-card home-balance">
+                <div className="eyebrow">Joriy balans</div>
+                <div className="big">{fmt(me.balance)}</div>
+                <div className="row">
+                  <span className="muted">TITAN DONAT hisobi</span>
+                  <button className="btn light small" onClick={() => go("topup")}>To‘ldirish</button>
+                </div>
+              </section>
 
-            <section className="section-block">
-              <div className="section-heading">
-                <div><span className="eyebrow">TEZKOR KIRISH</span><h2>Kerakli bo‘lim</h2></div>
+              <div
+                className="promo-slider"
+                onPointerDown={onBannerDown}
+                onPointerMove={onBannerMove}
+                onPointerUp={onBannerUp}
+                onPointerCancel={onBannerCancel}
+              >
+                <div
+                  className={\`promo-track \${dragging ? "dragging" : ""}\`}
+                  style={{ transform: \`translateX(calc(\${-current * 100}% + \${dragX}px))\` }}
+                >
+                  {slides.map((b, i) => (
+                    <div className="promo-slide" key={b?.id ?? i}>
+                      <button
+                        type="button"
+                        className={\`promo-banner \${b?.image_url ? "has-image" : ""}\`}
+                        onClick={() => openBanner(b)}
+                      >
+                        {b?.image_url && (
+                          <img className="promo-image" src={b.image_url} alt={b.title || ""} draggable={false} />
+                        )}
+                        <span className="promo-shade" />
+                        <span className="promo-copy">
+                          <small>{b?.title || "ONESTATE RP"}</small>
+                          <strong>{b?.text || "Donat paketlari va xizmatlar"}</strong>
+                          {b?.target_url && <em>Batafsil</em>}
+                        </span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {banners.length > 1 && (
+                  <div className="promo-dots" aria-hidden="true">
+                    {banners.map((b, i) => (
+                      <span key={b?.id ?? i} className={i === current ? "active" : ""} />
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="quick-grid">
-                <button className="quick-card" onClick={() => go("balance")}>
-                  <span className="quick-icon">◈</span><span>Balans</span><small>Hisobingiz</small>
+
+              <section className="section-block">
+                <div className="section-heading">
+                  <div><span className="eyebrow">Tezkor kirish</span><h2>Kerakli bo‘lim</h2></div>
+                </div>
+                <div className="quick-grid">
+                  <button className="quick-card" onClick={() => go("balance")}>
+                    <span className="quick-icon"><Icon name="wallet" /></span>
+                    <span className="q-title">Balans</span><small>Hisobingiz</small>
+                  </button>
+                  <button className="quick-card" onClick={() => go("orders")}>
+                    <span className="quick-icon"><Icon name="orders" /></span>
+                    <span className="q-title">Oxirgi xarid</span><small>Buyurtmalar</small>
+                  </button>
+                  <button className="quick-card" onClick={() => go("shop")}>
+                    <span className="quick-icon"><Icon name="shop" /></span>
+                    <span className="q-title">ONESTATE donat</span><small>Donat paketlari</small>
+                  </button>
+                  <button className="quick-card" onClick={() => go("support")}>
+                    <span className="quick-icon"><Icon name="support" /></span>
+                    <span className="q-title">Yordam</span><small>Support bilan aloqa</small>
+                  </button>
+                </div>
+              </section>
+
+              <section className="section-block">
+                <div className="section-heading">
+                  <div><span className="eyebrow">ONESTATE RP</span><h2>Donat paketlari</h2></div>
+                  <button className="text-action" onClick={() => go("shop")}>Barchasi</button>
+                </div>
+                <button className="list-btn" onClick={() => go("shop")}>
+                  <span className="list-icon dark"><Icon name="shop" /></span>
+                  <span className="list-text"><strong>ONESTATE RP</strong><span>Donat va o‘yin xizmatlari</span></span>
+                  <Icon name="chevron" className="list-chev" />
                 </button>
-                <button className="quick-card" onClick={() => go("orders")}>
-                  <span className="quick-icon">▤</span><span>Oxirgi xarid</span><small>Buyurtmalar</small>
+                {me.is_admin && (
+                  <button className="list-btn" onClick={() => go("admin")}>
+                    <span className="list-icon"><Icon name="admin" /></span>
+                    <span className="list-text"><strong>Admin panel</strong><span>Boshqaruv markazi</span></span>
+                    <Icon name="chevron" className="list-chev" />
+                  </button>
+                )}
+              </section>
+            </>
+          ) : (
+            <>
+              <div className="page-header">
+                <button className="back" aria-label="Orqaga" onClick={() => { go("home"); refresh(); }}>
+                  <Icon name="back" />
                 </button>
-                <button className="quick-card" onClick={() => go("shop")}>
-                  <span className="quick-icon">💎</span><span>ONESTATE donat</span><small>Donat paketlari</small>
-                </button>
-                <button className="quick-card" onClick={() => go("support")}>
-                  <span className="quick-icon">⌁</span><span>Yordam</span><small>Support bilan aloqa</small>
-                </button>
+                <h2 className="page-title">{titles[page] || "TITANPAY"}</h2>
               </div>
-            </section>
-
-            <section className="section-block games-section">
-              <div className="section-heading">
-                <div><span className="eyebrow">ONESTATE RP</span><h2>Donat paketlari</h2></div>
-                <button className="text-action" onClick={() => go("shop")}>Barchasi ↗</button>
-              </div>
-              <button className="game-card" onClick={() => go("shop")}>
-                <div className="game-icon">🎮</div>
-                <div className="game-info"><strong>ONESTATE RP</strong><span>Donat va o‘yin xizmatlari</span></div>
-                <span className="game-arrow">→</span>
-              </button>
-            </section>
-
-            {me.is_admin && (
-              <button className="admin-shortcut" onClick={() => go("admin")}>⚙ Admin panel</button>
-            )}
-          </>
-        ) : (
-          <>
-            <div className="header page-header">
-              <button className="back" onClick={() => { go("home"); refresh(); }}>←</button>
-              <h2 className="neon-text" style={{ margin: 0 }}>{titles[page] || "TITANPAY"}</h2>
-            </div>
-            {page === "shop" && <Shop me={me} refresh={refresh} go={go} />}
-            {page === "balance" && <Balance me={me} />}
-            {page === "topup" && <Topup go={go} />}
-            {page === "orders" && <Orders go={go} />}
-            {page === "profile" && <Profile me={me} />}
-            {page === "support" && <Support ctx={ctx} />}
-            {page === "rules" && <Rules />}
-            {page === "admin" && me.is_admin && <Admin />}
-          </>
-        )}
+              {page === "shop" && <Shop me={me} refresh={refresh} go={go} />}
+              {page === "balance" && <Balance me={me} />}
+              {page === "topup" && <Topup go={go} />}
+              {page === "orders" && <Orders go={go} />}
+              {page === "profile" && <Profile me={me} />}
+              {page === "support" && <Support ctx={ctx} />}
+              {page === "rules" && <Rules />}
+              {page === "admin" && me.is_admin && <Admin />}
+            </>
+          )}
+        </div>
       </main>
 
       <nav className="bottom-nav" aria-label="Asosiy navigatsiya">
         {BOTTOM_NAV.map(([key, icon, label]) => (
-          <button key={key} className={`nav-item ${page === key ? "active" : ""}`} onClick={() => go(key)}>
-            <span className="nav-icon">{icon}</span><span>{label}</span>
+          <button key={key} className={\`nav-item \${page === key ? "active" : ""}\`} onClick={() => go(key)}>
+            <span className="nav-icon"><Icon name={icon} size={22} /></span><span>{label}</span>
           </button>
         ))}
       </nav>
