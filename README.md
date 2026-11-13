@@ -71,9 +71,11 @@ pytest -q
 2. `app/delivery/onestate.py` ichidagi `deliver()` so'rov formati **taxminiy**: rasmiy hujjatga moslang (autentifikatsiya, maydonlar, muvaffaqiyat/xato kodlari).
 3. Navbatda turgan buyurtmalar ishchi tomonidan avtomatik yuboriladi.
 
-## Cheklovlar
+## Cheklovlar va keyingi ishlar
 
-- Migratsiya vositasi (Alembic) yo'q: jadvallar `create_all` bilan yaratiladi. Jadval o'zgarganda qo'lda migratsiya kerak bo'ladi.
+- Migratsiya vositasi (Alembic) hali yo'q: jadvallar `create_all` bilan yaratiladi. Jadval o'zgarganda boshqariladigan migratsiya qo'shish kerak.
 - Birinchi deployda web va bot bir vaqtda jadval yaratishga urinishi mumkin; xato chiqsa botni "Manual Deploy" bilan qayta ishga tushiring.
-- So'rovlar uchun rate limit yo'q.
-- To'lov muddati (`expires_at`) faqat "supportga murojaat oynasi"ni belgilaydi; muddatdan keyin kelgan aniq to'lovni provayder tasdiqlasa, baribir hisoblanadi.
+- So'rovlar uchun umumiy rate limit hali yo'q; ko'p nusxali Render ishga tushirishida ishlaydigan tashqi limitlash kerak.
+- UzCard/Humo provayderi tanlanib, integratsiya qilinmaguncha to'lovlar yopiq turadi.
+- ONESTATE RP rasmiy API hujjatlari olinmaguncha avtomatik yetkazish yoqilmaydi; noaniq natijalar qo'lda tekshiruvga o'tadi.
+- To'lov muddati (`expires_at`) supportga murojaat oynasini belgilaydi; kechikkan webhook holati alohida tekshiriladi.

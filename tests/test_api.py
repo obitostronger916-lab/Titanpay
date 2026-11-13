@@ -34,6 +34,12 @@ async def test_health(client):
     assert r.status_code == 200 and r.json()["status"] == "ok"
 
 
+async def test_payment_status_is_unavailable_without_provider(client):
+    r = await client.get("/api/payment-status", headers=h(555))
+    assert r.status_code == 200
+    assert r.json()["available"] is False
+
+
 async def test_no_init_data_is_401(client):
     assert (await client.get("/api/me")).status_code == 401
 

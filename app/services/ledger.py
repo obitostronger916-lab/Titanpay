@@ -85,6 +85,12 @@ async def handle_provider_confirmation(s: AsyncSession, payment_id: str, provide
         return "already_processed"
     p.provider_tx_id = provider_tx_id
     p.paid_amount = paid_amount
+    expires_at = p.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if datetime.now(timezone.utc) > expires_at:
+        p.status = "review"
+        return "review"
     if paid_amount == p.expected_amount:
         await _apply(s, p.user_id, paid_amount, "topup", "payment", p.id)
         p.status = "credited"

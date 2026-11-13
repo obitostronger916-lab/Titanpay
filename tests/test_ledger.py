@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime, timedelta, timezone
 
 from app.models import Order, Product, User
 from app.services import ledger
@@ -69,6 +70,20 @@ async def test_invalid_payment_events_are_rejected_without_changing_payment(sess
     assert p.status == "created"
     assert p.provider_tx_id is None
     assert u.balance == 0
+
+
+async def test_expired_payment_goes_to_manual_review(session):
+    u = await mk_user(session)
+    p = await ledger.create_payment(session, 1, 50000, "test")
+    p.expires_at = datetime.now(timezone.utc) - timedelta(minutes=1)
+
+    result = await ledger.handle_provider_confirmation(session, p.id, "TX-LATE", 50000)
+    assert result == "review"
+    assert p.status == "review"
+    assert u.balance == 0
+
+    await ledger.admin_credit_mismatch(session, 111, p.id)
+    assert u.balance == 50000
 
 
 async def test_payment_must_match_active_provider(session):

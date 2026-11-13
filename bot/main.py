@@ -131,6 +131,8 @@ async def notify_loop(bot: Bot):
         last_msg = (await s.execute(select(func.coalesce(func.max(TicketMessage.id), 0)))).scalar()
         seen_mismatch = set((await s.execute(
             select(Payment.id).where(Payment.status == "mismatch"))).scalars().all())
+        seen_review = set((await s.execute(
+            select(Payment.id).where(Payment.status == "review"))).scalars().all())
     while True:
         try:
             async with SessionLocal() as s:
@@ -141,6 +143,7 @@ async def notify_loop(bot: Bot):
                     .order_by(TicketMessage.id))).scalars().all()
                 last_msg_all = (await s.execute(select(func.coalesce(func.max(TicketMessage.id), 0)))).scalar()
                 mism = (await s.execute(select(Payment).where(Payment.status == "mismatch"))).scalars().all()
+                reviews = (await s.execute(select(Payment).where(Payment.status == "review"))).scalars().all()
                 tickets = {t.id: t.user_id for t in (await s.execute(
                     select(Ticket).where(Ticket.id.in_([x.ticket_id for x in msgs])))).scalars().all()} if msgs else {}
             for e in entries:
@@ -161,6 +164,20 @@ async def notify_loop(bot: Bot):
                     await safe_send(bot, settings.ADMIN_ID,
                                     f"⚠️ Noto'g'ri to'lov {p.id}: kutilgan {p.expected_amount}, "
                                     f"to'langan {p.paid_amount}. Admin panelda tekshiring.")
+            for p in reviews:
+                if p.id in seen_review:
+                    continue
+                seen_review.add(p.id)
+                await safe_send(
+                    bot, p.user_id,
+                    f"⚠️ To'lov {p.id}: tasdiq muddati o'tgandan keyin keldi. Balansga avtomatik yozilmadi; admin tekshiradi."
+                )
+                if settings.ADMIN_ID:
+                    await safe_send(
+                        bot, settings.ADMIN_ID,
+                        f"⚠️ Kechikkan to'lov {p.id}: kutilgan {p.expected_amount}, "
+                        f"to'langan {p.paid_amount}. Admin panelda tekshiring."
+                    )
             for mm in msgs:
                 uid = tickets.get(mm.ticket_id)
                 if uid:
