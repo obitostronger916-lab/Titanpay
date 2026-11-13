@@ -1,3 +1,5 @@
+import base64
+import binascii
 from urllib.parse import urlparse
 from typing import Literal
 
@@ -272,9 +274,35 @@ class BackgroundIn(BaseModel):
     @field_validator("image_data")
     @classmethod
     def validate_image_data(cls, value: str):
-        allowed = ("data:image/jpeg;base64,", "data:image/png;base64,", "data:image/webp;base64,")
-        if not value.startswith(allowed):
+        allowed = (
+            "data:image/jpeg;base64,",
+            "data:image/png;base64,",
+            "data:image/webp;base64,",
+        )
+        prefix = next((item for item in allowed if value.startswith(item)), None)
+        if prefix is None:
             raise ValueError("Faqat JPG, PNG yoki WebP rasm yuklang")
+
+        try:
+            image_bytes = base64.b64decode(value[len(prefix):], validate=True)
+        except (binascii.Error, ValueError):
+            raise ValueError("Rasm ma'lumoti xato")
+
+        if not image_bytes or len(image_bytes) > 2 * 1024 * 1024:
+            raise ValueError("Rasm hajmi 2 MB dan oshmasligi kerak")
+
+        if prefix == "data:image/jpeg;base64,":
+            valid_signature = image_bytes.startswith(b"\xff\xd8\xff")
+        elif prefix == "data:image/png;base64,":
+            valid_signature = image_bytes.startswith(b"\x89PNG\r\n\x1a\n")
+        else:
+            valid_signature = (
+                len(image_bytes) >= 12
+                and image_bytes[:4] == b"RIFF"
+                and image_bytes[8:12] == b"WEBP"
+            )
+        if not valid_signature:
+            raise ValueError("Rasm formati va fayl mazmuni mos emas")
         return value
 
 

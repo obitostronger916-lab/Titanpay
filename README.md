@@ -67,9 +67,10 @@ pytest -q
 
 ## ONESTATE RP API'ni ulash (hujjat kelgach)
 
-1. Render'da `ONESTATE_API_URL` va `ONESTATE_API_KEY` ni kiriting.
-2. `app/delivery/onestate.py` ichidagi `deliver()` so'rov formati **taxminiy**: rasmiy hujjatga moslang (autentifikatsiya, maydonlar, muvaffaqiyat/xato kodlari).
-3. Navbatda turgan buyurtmalar ishchi tomonidan avtomatik yuboriladi.
+1. Rasmiy API hujjatlari, autentifikatsiya talablari va sandbox ma'lumotlari olinmaguncha `ONESTATE_DELIVERY_ENABLED=false` holatida qoldiring.
+2. Hujjatlar kelgach `app/delivery/onestate.py` ichidagi `deliver()` so'rovini aynan rasmiy formatga moslang; idempotency qo'llab-quvvatlanishini ham hujjatdan tekshiring.
+3. Sandbox'da muvaffaqiyat, rad etish, timeout va takroriy so'rov holatlarini tekshiring.
+4. Faqat moslashtirish va sinovlar tugagach, Render'da `ONESTATE_DELIVERY_ENABLED=true` qiling. URL va API keyning o'zi yetkazishni yoqmaydi.
 
 ## Cheklovlar va keyingi ishlar
 
@@ -77,5 +78,5 @@ pytest -q
 - Birinchi deployda web va bot bir vaqtda jadval yaratishga urinishi mumkin; xato chiqsa botni "Manual Deploy" bilan qayta ishga tushiring.
 - So'rovlar uchun umumiy rate limit hali yo'q; ko'p nusxali Render ishga tushirishida ishlaydigan tashqi limitlash kerak.
 - UzCard/Humo provayderi tanlanib, integratsiya qilinmaguncha to'lovlar yopiq turadi.
-- ONESTATE RP rasmiy API hujjatlari olinmaguncha avtomatik yetkazish yoqilmaydi; noaniq natijalar qo'lda tekshiruvga o'tadi.
+- ONESTATE RP rasmiy API hujjatlari va sandbox sinovlari bo'lmaguncha yetkazish bayrog'i o'chiq; URL va kalitning o'zi worker'ni ishga tushirmaydi. Noaniq natijalar qo'lda tekshiruvga o'tadi.
 - To'lov muddati (`expires_at`) supportga murojaat oynasini belgilaydi; kechikkan webhook holati alohida tekshiriladi.
