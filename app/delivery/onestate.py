@@ -5,14 +5,18 @@ from app.delivery.base import DeliveryNotConfigured, DeliveryResult, DeliveryRet
 
 
 def is_configured() -> bool:
-    return bool(settings.ONESTATE_API_URL and settings.ONESTATE_API_KEY)
+    return bool(
+        settings.ONESTATE_DELIVERY_ENABLED
+        and settings.ONESTATE_API_URL
+        and settings.ONESTATE_API_KEY
+    )
 
 
 async def deliver(order_id: str, game_nick: str, payload: str | None) -> DeliveryResult:
     """ONESTATE RP API adapteri.
-    DIQQAT: rasmiy API hujjati yo'q. Quyidagi so'rov formati TAXMINIY — hujjat kelganda
-    faqat shu funksiyani moslang. Sozlanmagan bo'lsa DeliveryNotConfigured ko'tariladi.
-    order_id idempotency kaliti sifatida yuboriladi (takroriy yuborishdan himoya)."""
+    DIQQAT: rasmiy API hujjati yo'q. Quyidagi so'rov formati TAXMINIY va
+    ONESTATE_DELIVERY_ENABLED aniq yoqilmaguncha ishlamaydi. Rasmiy hujjat va sandbox
+    sinovlaridan keyingina so'rov maydonlari, autentifikatsiya va idempotency mosligini tasdiqlang."""
     if not is_configured():
         raise DeliveryNotConfigured("ONESTATE API sozlanmagan")
     try:
