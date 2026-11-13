@@ -1,6 +1,6 @@
-
 import { useEffect, useState } from "react";
 import { api, fmt, STATUS_UZ } from "../api";
+import { Icon } from "../icons";
 import type { Me, Nav } from "../App";
 
 const KIND_UZ: Record<string, string> = {
@@ -24,26 +24,24 @@ export function Balance({ me }: { me: Me }) {
 
   return (
     <>
-      <div className="card balance-card">
-        <div className="muted">SIZNING JORIY BALANSINGIZ</div>
-        <div className="big gold">{fmt(me.balance)}</div>
-        <div className="muted" style={{ marginTop: 6 }}>
-          UZS · TITAN DONAT
-        </div>
+      <div className="balance-card">
+        <div className="eyebrow">SIZNING JORIY BALANSINGIZ</div>
+        <div className="big">{fmt(me.balance)}</div>
+        <div className="muted mt-s">UZS · TITAN DONAT</div>
       </div>
 
-      <div className="row" style={{ margin: "20px 0 12px" }}>
-        <h3 style={{ margin: 0 }}>Balans tarixi</h3>
+      <div className="row mt-l mb-m">
+        <h3 className="m0">Balans tarixi</h3>
         <span className="muted">{rows.length} ta operatsiya</span>
       </div>
 
       {loading && <div className="muted">Tarix yuklanmoqda...</div>}
 
       {!loading && rows.length === 0 && (
-        <div className="card" style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 30 }}>📊</div>
+        <div className="card state">
+          <div className="state-icon"><Icon name="wallet" size={22} /></div>
           <b>Hozircha operatsiyalar yo'q</b>
-          <p className="muted">Balansingizdagi o'zgarishlar shu yerda chiqadi.</p>
+          <p>Balansingizdagi o'zgarishlar shu yerda chiqadi.</p>
         </div>
       )}
 
@@ -52,14 +50,14 @@ export function Balance({ me }: { me: Me }) {
           <div className="row">
             <div>
               <b>{KIND_UZ[r.kind] || r.kind}</b>
-              <div className="muted" style={{ marginTop: 5 }}>
+              <div className="muted mt-s">
                 {new Date(r.created_at).toLocaleString()}
               </div>
             </div>
 
             <b
               style={{
-                color: r.amount > 0 ? "var(--green)" : "var(--red)",
+                color: r.amount > 0 ? "var(--ok)" : "var(--danger)",
                 whiteSpace: "nowrap",
               }}
             >
@@ -68,7 +66,7 @@ export function Balance({ me }: { me: Me }) {
             </b>
           </div>
 
-          <div className="muted" style={{ marginTop: 12 }}>
+          <div className="muted mt-m">
             Qoldiq: {fmt(r.balance_after)}
           </div>
         </div>
@@ -90,19 +88,19 @@ export function Orders({ go }: { go: Nav }) {
 
   return (
     <>
-      <div style={{ marginBottom: 17 }}>
-        <div className="muted">TITAN DONAT</div>
-        <h2 style={{ margin: "5px 0" }}>Buyurtmalarim 📦</h2>
+      <div className="mb-l">
+        <div className="eyebrow">TITAN DONAT</div>
+        <h2 className="mt-s mb-s">Buyurtmalarim</h2>
         <div className="muted">Barcha buyurtmalaringiz tarixi.</div>
       </div>
 
       {loading && <div className="muted">Buyurtmalar yuklanmoqda...</div>}
 
       {!loading && rows.length === 0 && (
-        <div className="card" style={{ textAlign: "center", padding: 25 }}>
-          <div style={{ fontSize: 36 }}>📦</div>
+        <div className="card state">
+          <div className="state-icon"><Icon name="box" size={22} /></div>
           <b>Buyurtmalar hali yo'q</b>
-          <p className="muted">Donat do'konidan mahsulot tanlashingiz mumkin.</p>
+          <p>Donat do'konidan mahsulot tanlashingiz mumkin.</p>
         </div>
       )}
 
@@ -110,32 +108,31 @@ export function Orders({ go }: { go: Nav }) {
         <div className="card" key={o.id}>
           <div className="row">
             <b>Buyurtma #{o.id}</b>
-            <span className="badge">
+            <span className="badge" data-status={o.status}>
               {STATUS_UZ[o.status] || o.status}
             </span>
           </div>
 
-          <h3 style={{ margin: "13px 0 5px" }}>{o.product}</h3>
+          <h3 className="mt-m mb-s">{o.product}</h3>
           <div className="muted">Character: {o.character_name || "—"} · Server: {o.server || "—"}</div>
 
-          <div className="price">{fmt(o.price)}</div>
+          <div className="price mt-s">{fmt(o.price)}</div>
 
-          <div className="muted" style={{ marginTop: 9 }}>
+          <div className="muted mt-s">
             {new Date(o.created_at).toLocaleString()}
           </div>
 
           {o.result && (
-            <div className="msg" style={{ marginTop: 10 }}>
+            <div className="msg mt-m">
               Natija: {o.result}
             </div>
           )}
 
           <button
-            className="btn ghost"
-            style={{ marginTop: 12 }}
+            className="btn ghost mt-m"
             onClick={() => go("support", { order_id: o.id })}
           >
-            🎧 Buyurtma bo'yicha yordam
+            <Icon name="support" size={18} /> Buyurtma bo'yicha yordam
           </button>
         </div>
       ))}
@@ -143,58 +140,66 @@ export function Orders({ go }: { go: Nav }) {
   );
 }
 
-export function Profile({ me }: { me: Me }) {
+export function Profile({ me, go }: { me: Me; go: Nav }) {
   return (
     <>
-      <div className="card balance-card" style={{ textAlign: "center", padding: 25 }}>
-        <div
-          style={{
-            width: 75,
-            height: 75,
-            borderRadius: 25,
-            display: "grid",
-            placeItems: "center",
-            margin: "0 auto 13px",
-            background: "linear-gradient(135deg,#294d75,#44366f)",
-            fontSize: 36,
-          }}
-        >
-          👤
-        </div>
+      <div className="balance-card" style={{ textAlign: "center", padding: 24 }}>
+        <div className="avatar"><Icon name="user" size={34} /></div>
 
-        <h2 style={{ marginBottom: 5 }}>{me.name || "O'yinchi"}</h2>
+        <h2 className="mb-s">{me.name || "O'yinchi"}</h2>
         <div className="muted">ONESTATE ROLEPLAY</div>
-        <div className="big gold" style={{ marginTop: 15 }}>
-          {fmt(me.balance)}
-        </div>
+        <div className="big mt-l">{fmt(me.balance)}</div>
         <div className="muted">Mavjud balans · UZS</div>
       </div>
 
       <div className="card">
         <h3>Profil ma'lumotlari</h3>
 
-        <div className="row" style={{ padding: "12px 0" }}>
+        <div className="info-row">
           <span className="muted">Ism</span>
           <b>{me.name || "-"}</b>
         </div>
 
-        <div className="row" style={{ padding: "12px 0" }}>
+        <div className="info-row">
           <span className="muted">Telegram ID</span>
           <b>{me.id}</b>
         </div>
 
-        <div className="row" style={{ padding: "12px 0" }}>
+        <div className="info-row">
           <span className="muted">Hisob holati</span>
-          <span className="badge">Faol</span>
+          <span className="badge on">Faol</span>
         </div>
 
         {me.is_admin && (
-          <div className="row" style={{ padding: "12px 0" }}>
+          <div className="info-row">
             <span className="muted">Huquq</span>
-            <span className="badge">Administrator</span>
+            <span className="badge on">Administrator</span>
           </div>
         )}
       </div>
+
+      <button className="list-btn" onClick={() => go("balance")}>
+        <span className="list-icon"><Icon name="wallet" /></span>
+        <span className="list-text"><strong>Balans tarixi</strong><span>Barcha operatsiyalar</span></span>
+        <Icon name="chevron" className="list-chev" />
+      </button>
+      <button className="list-btn" onClick={() => go("support")}>
+        <span className="list-icon"><Icon name="support" /></span>
+        <span className="list-text"><strong>Yordam</strong><span>Support bilan aloqa</span></span>
+        <Icon name="chevron" className="list-chev" />
+      </button>
+      <button className="list-btn" onClick={() => go("rules")}>
+        <span className="list-icon"><Icon name="rules" /></span>
+        <span className="list-text"><strong>Qoidalar</strong><span>Foydalanish qoidalari</span></span>
+        <Icon name="chevron" className="list-chev" />
+      </button>
+      {me.is_admin && (
+        <button className="list-btn" onClick={() => go("admin")}>
+          <span className="list-icon"><Icon name="admin" /></span>
+          <span className="list-text"><strong>Admin panel</strong><span>Boshqaruv markazi</span></span>
+          <Icon name="chevron" className="list-chev" />
+        </button>
+      )}
     </>
   );
 }
@@ -212,9 +217,9 @@ export function Rules() {
 
   return (
     <>
-      <div style={{ marginBottom: 17 }}>
-        <div className="muted">TITAN DONAT</div>
-        <h2 style={{ margin: "5px 0" }}>Foydalanish qoidalari 📜</h2>
+      <div className="mb-l">
+        <div className="eyebrow">TITAN DONAT</div>
+        <h2 className="mt-s mb-s">Foydalanish qoidalari</h2>
         <div className="muted">
           Xarid va to'lovdan oldin qoidalar bilan tanishing.
         </div>
@@ -222,7 +227,7 @@ export function Rules() {
 
       {rules.map((rule, i) => (
         <div className="card" key={i}>
-          <div className="row" style={{ alignItems: "flex-start" }}>
+          <div className="row start">
             <span
               className="badge"
               style={{ minWidth: 29, textAlign: "center" }}
