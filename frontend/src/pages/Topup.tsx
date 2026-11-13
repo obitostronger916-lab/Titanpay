@@ -1,6 +1,6 @@
-
 import { useEffect, useState } from "react";
 import { api, fmt, STATUS_UZ, tg } from "../api";
+import { Icon } from "../icons";
 import type { Nav } from "../App";
 
 type Pay = {
@@ -78,9 +78,9 @@ export default function Topup({ go }: { go: Nav }) {
 
   return (
     <>
-      <div style={{ marginBottom: 18 }}>
-        <div className="muted">ONESTATE ROLEPLAY</div>
-        <h2 style={{ margin: "5px 0" }}>Balansni to'ldirish</h2>
+      <div className="mb-l">
+        <div className="eyebrow">ONESTATE ROLEPLAY</div>
+        <h2 className="mt-s mb-s">Balansni to'ldirish</h2>
         <div className="muted">
           UzCard va Humo orqali to'lov xizmati holati quyida ko'rsatiladi.
         </div>
@@ -89,11 +89,11 @@ export default function Topup({ go }: { go: Nav }) {
       <div className="card">
         <h3>To'lov tizimlari</h3>
         {!paymentStatusLoaded ? (
-          <p className="muted">To'lov tizimi holati tekshirilmoqda...</p>
+          <p className="muted m0">To'lov tizimi holati tekshirilmoqda...</p>
         ) : paymentAvailable ? (
-          <p className="muted">To'lov provayderi ulangan. To'lovni davom ettirishingiz mumkin.</p>
+          <p className="muted m0">To'lov provayderi ulangan. To'lovni davom ettirishingiz mumkin.</p>
         ) : (
-          <p className="muted">
+          <p className="muted m0">
             UzCard/Humo provayderi hali ulanmagan. Xizmat tayyor bo'lmaguncha to'lov yaratish yopiq.
           </p>
         )}
@@ -101,7 +101,7 @@ export default function Topup({ go }: { go: Nav }) {
 
       <div className="card">
         <h3>To'lov summasi</h3>
-        <div className="muted" style={{ marginBottom: 12 }}>
+        <div className="muted mb-m">
           Summani UZS da kiriting. Minimal summa — 1 000 UZS.
         </div>
 
@@ -142,32 +142,31 @@ export default function Topup({ go }: { go: Nav }) {
         >
           {busy ? "Yaratilmoqda..." : paymentAvailable ? "To'lov yaratish" : "Provayder ulanmagan"}
         </button>
-
       </div>
 
       {info && (
-        <div className="card balance-card">
-          <div className="badge">TO'LOV YARATILDI</div>
-          <h3 style={{ marginTop: 12 }}>To'lov ma'lumotlari</h3>
+        <div className="card strong">
+          <div className="badge on">TO'LOV YARATILDI</div>
+          <h3 className="mt-m">To'lov ma'lumotlari</h3>
 
-          <div className="row" style={{ marginTop: 12 }}>
+          <div className="row mt-m">
             <span className="muted">To'lov ID</span>
             <b>{info.payment_id}</b>
           </div>
 
-          <div className="row" style={{ marginTop: 12 }}>
+          <div className="row mt-m">
             <span className="muted">To'lanadigan summa</span>
             <b className="price">{fmt(info.amount)}</b>
           </div>
 
           {info.card_info && (
-            <div className="card" style={{ marginTop: 12 }}>
+            <div className="msg mt-m">
               {info.card_info}
             </div>
           )}
 
           {info.expires_at && (
-            <div className="muted" style={{ marginTop: 10 }}>
+            <div className="muted mt-m">
               Amal qilish muddati:{" "}
               {new Date(info.expires_at).toLocaleString()}
             </div>
@@ -175,28 +174,28 @@ export default function Topup({ go }: { go: Nav }) {
 
           {info.pay_url && (
             <button
-              className="btn"
-              style={{ marginTop: 15 }}
+              className="btn mt-l"
               onClick={() => openPayment(info.pay_url)}
             >
               To'lovga o'tish
             </button>
           )}
 
-          <p className="muted" style={{ marginTop: 12 }}>
+          <p className="muted mt-m m0">
             To'lov holati tasdiqlanmaguncha balansga mablag' qo'shilmaydi.
           </p>
         </div>
       )}
 
-      <div className="row" style={{ margin: "20px 0 12px" }}>
-        <h3 style={{ margin: 0 }}>To'lovlar tarixi</h3>
+      <div className="row mt-l mb-m">
+        <h3 className="m0">To'lovlar tarixi</h3>
         <span className="muted">{list.length} ta</span>
       </div>
 
       {list.length === 0 && (
-        <div className="card muted" style={{ textAlign: "center" }}>
-          Hozircha to'lovlar mavjud emas.
+        <div className="card state">
+          <div className="state-icon"><Icon name="card" size={22} /></div>
+          <b>Hozircha to'lovlar mavjud emas</b>
         </div>
       )}
 
@@ -204,31 +203,30 @@ export default function Topup({ go }: { go: Nav }) {
         <div className="card" key={p.id}>
           <div className="row">
             <b>#{p.id}</b>
-            <span className="badge">
+            <span className="badge" data-status={p.status}>
               {STATUS_UZ[p.status] || p.status}
             </span>
           </div>
 
-          <div className="row" style={{ marginTop: 12 }}>
+          <div className="row mt-m">
             <span className="muted">Kutilgan summa</span>
             <b className="price">{fmt(p.expected)}</b>
           </div>
 
           {p.paid != null && (
-            <div className="row" style={{ marginTop: 7 }}>
+            <div className="row mt-s">
               <span className="muted">To'langan</span>
               <b>{fmt(p.paid)}</b>
             </div>
           )}
 
-          <div className="muted" style={{ marginTop: 9 }}>
+          <div className="muted mt-s">
             {new Date(p.created_at).toLocaleString()}
           </div>
 
           {p.can_report && p.status !== "credited" && (
             <button
-              className="btn ghost"
-              style={{ marginTop: 12 }}
+              className="btn ghost mt-m"
               onClick={() =>
                 go("support", { payment_id: p.id })
               }
