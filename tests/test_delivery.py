@@ -1,3 +1,4 @@
+from app.config import settings
 from app.db import SessionLocal
 from app.delivery import onestate
 from app.delivery.base import DeliveryResult, DeliveryRetryable
@@ -91,3 +92,14 @@ async def test_admin_can_mark_review_delivered_after_manual_check():
         await ledger.resolve_order_review(s, 99, oid, "delivered", "Serverda donat borligi tekshirildi")
         await s.commit()
     assert await state(oid) == ("delivered", 4000, 0)
+
+
+
+def test_delivery_requires_explicit_enable_flag(monkeypatch):
+    monkeypatch.setattr(settings, "ONESTATE_API_URL", "https://example.invalid/api")
+    monkeypatch.setattr(settings, "ONESTATE_API_KEY", "test-key")
+    monkeypatch.setattr(settings, "ONESTATE_DELIVERY_ENABLED", False)
+    assert onestate.is_configured() is False
+
+    monkeypatch.setattr(settings, "ONESTATE_DELIVERY_ENABLED", True)
+    assert onestate.is_configured() is True
