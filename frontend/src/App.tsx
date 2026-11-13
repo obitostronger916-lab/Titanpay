@@ -331,7 +331,7 @@ export default function App() {
               {page === "balance" && <Balance me={me} />}
               {page === "topup" && <Topup go={go} />}
               {page === "orders" && <Orders go={go} />}
-              {page === "profile" && <Profile me={me} />}
+              {page === "profile" && <Profile me={me} go={go} />}
               {page === "support" && <Support ctx={ctx} />}
               {page === "rules" && <Rules />}
               {page === "admin" && me.is_admin && <Admin />}
