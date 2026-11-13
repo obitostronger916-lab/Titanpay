@@ -17,7 +17,8 @@ log = logging.getLogger("bot")
 
 dp = Dispatcher()
 STATUS_UZ = {"pending": "Kutilmoqda", "paid": "To'lov tasdiqlandi", "queued": "Navbatda",
-             "processing": "Jarayonda", "delivered": "Yetkazildi", "error": "Xatolik"}
+             "processing": "Jarayonda", "review": "Tekshiruvda",
+             "delivered": "Yetkazildi", "error": "Xatolik"}
 
 
 def app_kb() -> InlineKeyboardMarkup | None:
