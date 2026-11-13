@@ -64,3 +64,5 @@ services:
         sync: false
       - key: ONESTATE_API_KEY
         sync: false
+      - key: ONESTATE_DELIVERY_ENABLED
+        value: "false"
