@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api, tg, fmt } from "./api";
 import Shop from "./pages/Shop";
 import Topup from "./pages/Topup";
@@ -35,6 +35,8 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [banners, setBanners] = useState<any[]>([]);
   const [bannerIndex, setBannerIndex] = useState(0);
+  const bannerTouchStart = useRef<number | null>(null);
+  const bannerWasSwiped = useRef(false);
   const [sharedBackground, setSharedBackground] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
@@ -86,6 +88,10 @@ export default function App() {
   const changeBanner = (direction: number) => setBannerIndex((current) => (current + direction + banners.length) % banners.length);
 
   const openBanner = () => {
+    if (bannerWasSwiped.current) {
+      bannerWasSwiped.current = false;
+      return;
+    }
     if (activeBanner?.target_url) {
       if (tg?.openLink) tg.openLink(activeBanner.target_url);
       else window.open(activeBanner.target_url, "_blank", "noopener,noreferrer");
@@ -166,7 +172,22 @@ export default function App() {
               <div className="avatar-chip">⚡</div>
             </section>
 
-            <div className="promo-slider">
+            <div
+              className="promo-slider"
+              onTouchStart={(event) => {
+                bannerTouchStart.current = event.touches[0]?.clientX ?? null;
+                bannerWasSwiped.current = false;
+              }}
+              onTouchEnd={(event) => {
+                if (bannerTouchStart.current === null || banners.length < 2) return;
+                const distance = event.changedTouches[0].clientX - bannerTouchStart.current;
+                if (Math.abs(distance) > 45) {
+                  bannerWasSwiped.current = true;
+                  changeBanner(distance < 0 ? 1 : -1);
+                }
+                bannerTouchStart.current = null;
+              }}
+            >
               <button className={`promo-banner ${activeBanner?.image_url ? "has-image" : ""}`} onClick={openBanner}>
                 {activeBanner?.image_url && <img className="promo-image" src={activeBanner.image_url} alt={activeBanner.title} />}
                 <span className="promo-orb">✦</span>
@@ -177,20 +198,6 @@ export default function App() {
                 </span>
                 <span className="promo-arrow">›</span>
               </button>
-              {banners.length > 1 && (
-                <div className="promo-controls" aria-label="Reklama bannerlari">
-                  <button className="promo-step" aria-label="Oldingi reklama" onClick={() => changeBanner(-1)}>‹</button>
-                  <div className="promo-dots">
-                    {banners.map((banner, index) => (
-                      <button key={banner.id} aria-label={`Banner ${index + 1}`}
-                        className={index === bannerIndex ? "active" : ""}
-                        onClick={() => setBannerIndex(index)} />
-                    ))}
-                  </div>
-                  <span className="promo-count">{(bannerIndex % banners.length) + 1}/{banners.length}</span>
-                  <button className="promo-step" aria-label="Keyingi reklama" onClick={() => changeBanner(1)}>›</button>
-                </div>
-              )}
             </div>
 
             <section className="section-block">
