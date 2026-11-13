@@ -134,17 +134,9 @@ export default function App() {
   if (showSplash) {
     return (
       <div className="splash-screen">
-        <div className="splash-glow" />
-        <div className="logo-stage">
-          <div className="orbit orbit-one" />
-          <div className="orbit orbit-two" />
-          <div className="brand-mark splash-mark">T</div>
-          <span className="spark spark-one" />
-          <span className="spark spark-two" />
-          <span className="spark spark-three" />
-        </div>
-        <div className="splash-title">TITAN<span>PAY</span></div>
-        <div className="splash-subtitle">ONESTATE ROLEPLAY</div>
+        <div className="logo-stage"><div className="brand-mark splash-mark">T</div></div>
+        <div className="splash-title">TITANPAY</div>
+        <div className="splash-subtitle">ONESTATE RP DONAT XIZMATI</div>
         <div className="loading-line splash-loading"><span /></div>
       </div>
     );
@@ -163,7 +155,7 @@ export default function App() {
                   <div className="muted brand-caption">ONESTATE ROLEPLAY</div>
                 </div>
               </div>
-              <div className="online-pill"><i /> ONLINE</div>
+              <div className="online-pill">ONESTATE RP</div>
             </header>
 
             <section className="welcome-row">
@@ -180,8 +172,8 @@ export default function App() {
                 <span className="promo-orb">✦</span>
                 <span className="promo-copy">
                   <small>{activeBanner?.title || "ONESTATE RP"}</small>
-                  <strong>{activeBanner?.text || "O‘YININGIZNI YANGI DARAJAGA OLIB CHIQING"}</strong>
-                  {activeBanner?.target_url && <em>Batafsil ko‘rish ↗</em>}
+                  <strong>{activeBanner?.text || "Donat paketlari va xizmatlar"}</strong>
+                  {activeBanner?.target_url && <em>Batafsil</em>}
                 </span>
                 <span className="promo-arrow">›</span>
               </button>
