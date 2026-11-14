@@ -19,8 +19,8 @@ from app.services import rating
 URL_A = "https://t.me/i/userpic/320/AbCdEfGhIjKlMnOpQrStUvWxYz012345.jpg"
 
 
-def init_data(user_id: int, photo_url: str | None = None) -> str:
-    user = {"id": user_id, "first_name": "Test user"}
+def init_data(user_id: int, photo_url: str | None = None, first_name: str = "Test user") -> str:
+    user = {"id": user_id, "first_name": first_name}
     if photo_url:
         user["photo_url"] = photo_url
     pairs = {
@@ -138,7 +138,7 @@ async def test_api_response_is_private_and_signed_user_must_match(client, app, s
     await add_payment(session, 601, "API1", 25000, "credited", "topup", start + timedelta(minutes=10))
     await session.commit()
 
-    response = await client.get("/api/rating", headers={"X-Init-Data": init_data(601, URL_A)})
+    response = await client.get("/api/rating", headers={"X-Init-Data": init_data(601, URL_A, first_name="Donor")})
     assert response.status_code == 200
     payload = response.json()
     assert set(payload) == {"period", "start", "end", "items"}
