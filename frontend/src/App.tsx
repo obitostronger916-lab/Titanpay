@@ -8,6 +8,7 @@ import Topup from "./pages/Topup";
 import { Balance, Orders, Profile, Rules } from "./pages/Simple";
 import Support from "./pages/Support";
 import Admin from "./pages/Admin";
+import Rating from "./pages/Rating";
 
 export type Me = { id: number; name: string; balance: number; is_admin: boolean };
 export type Nav = (page: string, ctx?: any) => void;
@@ -168,6 +169,7 @@ export default function App() {
     TILES.map(([key, , title]) => [key, title])
   );
   titles.admin = "Admin panel";
+  titles.rating = "Top donatchilar";
 
   if (error) {
     return (
@@ -302,6 +304,17 @@ export default function App() {
 
               <section className="section-block">
                 <div className="section-heading">
+                  <div><span className="eyebrow">JAMOA</span><h2>Donatchilar reytingi</h2></div>
+                </div>
+                <button className="list-btn" onClick={() => go("rating")}>
+                  <span className="list-icon"><Icon name="users" /></span>
+                  <span className="list-text"><strong>Top 10 donatchilar</strong><span>Kunlik, oylik va yillik reyting</span></span>
+                  <Icon name="chevron" className="list-chev" />
+                </button>
+              </section>
+
+              <section className="section-block">
+                <div className="section-heading">
                   <div><span className="eyebrow">ONESTATE RP</span><h2>Donat paketlari</h2></div>
                   <button className="text-action" onClick={() => go("shop")}>Barchasi</button>
                 </div>
@@ -335,6 +348,7 @@ export default function App() {
               {page === "support" && <Support ctx={ctx} />}
               {page === "rules" && <Rules />}
               {page === "admin" && me.is_admin && <Admin />}
+              {page === "rating" && <Rating />}
             </>
           )}
         </div>
