@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (BigInteger, Boolean, CheckConstraint, DateTime,
-                        ForeignKey, Integer, String, Text, UniqueConstraint)
+                        ForeignKey, Index, Integer, String, Text, UniqueConstraint)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
@@ -30,7 +30,10 @@ class User(Base):
 class LedgerEntry(Base):
     """Balans tarixi. (kind, ref_type, ref_id) unikal => idempotency."""
     __tablename__ = "ledger"
-    __table_args__ = (UniqueConstraint("kind", "ref_type", "ref_id", name="uq_ledger_ref"),)
+    __table_args__ = (
+        UniqueConstraint("kind", "ref_type", "ref_id", name="uq_ledger_ref"),
+        Index("ix_ledger_rating_period", "ref_type", "created_at", "ref_id"),
+    )
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     amount: Mapped[int] = mapped_column(BigInteger)  # + kirim, - chiqim
@@ -130,3 +133,11 @@ class AppSetting(Base):
     __tablename__ = "app_settings"
     key: Mapped[str] = mapped_column(String(64), primary_key=True)
     value: Mapped[str] = mapped_column(Text)
+
+
+class UserAvatar(Base):
+    """Telegram profil rasmi: faqat foydalanuvchining o'z imzolangan initData'sidan."""
+    __tablename__ = "user_avatars"
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    avatar_url: Mapped[str] = mapped_column(String(1000))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)

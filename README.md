@@ -79,3 +79,8 @@ pytest -q
 - UzCard/Humo provayderi tanlanib, integratsiya qilinmaguncha to'lovlar yopiq turadi.
 - ONESTATE RP rasmiy API hujjatlari olinmaguncha avtomatik yetkazish yoqilmaydi; noaniq natijalar qo'lda tekshiruvga o'tadi.
 - To'lov muddati (`expires_at`) supportga murojaat oynasini belgilaydi; kechikkan webhook holati alohida tekshiriladi.
+
+
+## Donatchilar reytingi
+
+Mini App bosh sahifasidagi **Top 10 donatchilar** bo'limida kunlik, oylik va yillik reyting ko'rsatiladi. Reyting faqat balansga yozilgan tasdiqlangan to'lovlarni (shu jumladan admin tasdiqlagan summa farqlarini) hisoblaydi. To'lovlar Toshkent vaqti bo'yicha davrlarga ajratiladi. Ommaviy javobda faqat o'rin, ko'rsatiladigan ism, jami summa va ruxsat etilgan Telegram avatar manzili beriladi.
