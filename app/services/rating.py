@@ -13,7 +13,7 @@ from app.models import LedgerEntry, Payment, User, UserAvatar
 log = logging.getLogger(__name__)
 TASHKENT = ZoneInfo("Asia/Tashkent")
 _AVATAR_PATH_RE = re.compile(
-    r"/i/userpic/[0-9]{1,4}/[A-Za-z0-9_-]{16,128}\.(?:svg|jpe?g|png|webp)\\Z",
+    r"/i/userpic/[0-9]{1,4}/[A-Za-z0-9_-]{16,128}\.(?:svg|jpe?g|png|webp)\Z",
     re.IGNORECASE,
 )
 
