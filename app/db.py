@@ -44,7 +44,7 @@ async def init_db():
             indexes = {item["name"] for item in inspect(sync_conn).get_indexes("ledger")}
             if "ix_ledger_rating_period" not in indexes:
                 sync_conn.exec_driver_sql(
-                    "CREATE INDEX ix_ledger_rating_period "
+                    "CREATE INDEX IF NOT EXISTS ix_ledger_rating_period "
                     "ON ledger (ref_type, created_at, ref_id)"
                 )
 
