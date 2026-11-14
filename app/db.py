@@ -38,3 +38,14 @@ async def init_db():
                     )
 
         await conn.run_sync(add_order_identity_columns)
+
+        # create_all mavjud jadvalga keyin qo'shilgan indekslarni avtomatik yaratmaydi.
+        def ensure_rating_index(sync_conn):
+            indexes = {item["name"] for item in inspect(sync_conn).get_indexes("ledger")}
+            if "ix_ledger_rating_period" not in indexes:
+                sync_conn.exec_driver_sql(
+                    "CREATE INDEX ix_ledger_rating_period "
+                    "ON ledger (ref_type, created_at, ref_id)"
+                )
+
+        await conn.run_sync(ensure_rating_index)
