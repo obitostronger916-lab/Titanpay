@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 
-from app.api import admin, user, webhook
+from app.api import admin, rating, user, webhook
 from app.config import settings
 from app.db import engine, init_db
 from app.delivery import onestate
@@ -43,6 +43,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="TITAN DONAT", lifespan=lifespan)
 app.include_router(user.router)
+app.include_router(rating.router)
 app.include_router(admin.router)
 app.include_router(webhook.router)
 
