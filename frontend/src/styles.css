@@ -237,3 +237,39 @@ input[type="file"] { padding: 10px; font-size: 14px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none; transition: none; scroll-behavior: auto; }
 }
+/* ---------- Donatchilar reytingi ---------- */
+.rating-intro { margin: 4px 0 18px; }
+.rating-intro h2 { margin: 3px 0 2px; font-size: 23px; }
+.rating-intro p { margin: 0; color: var(--muted); font-size: 13px; }
+.rating-tabs { margin-bottom: 18px; }
+.rating-tabs .chip { flex: 1; justify-content: center; }
+.podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 8px; margin: 22px 0 20px; }
+.podium-person { display: flex; min-width: 0; flex-direction: column; align-items: center; text-align: center; }
+.podium-person strong { width: 100%; margin-top: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.podium-person small { margin-top: 2px; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+.rating-avatar { position: relative; display: grid; place-items: center; flex: 0 0 54px; width: 54px; height: 54px; overflow: hidden; border: 2px solid var(--line); border-radius: 50%; background: var(--soft); color: var(--ink); font-size: 17px; font-weight: 750; }
+.rating-avatar img { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; }
+.rating-avatar.large { width: 72px; height: 72px; flex-basis: 72px; border: 3px solid var(--ink); font-size: 21px; }
+.podium-person.first .rating-avatar { margin-top: 5px; }
+.podium-rank { display: none; }
+.podium-base { display: grid; place-items: center; width: 100%; margin-top: 9px; border-radius: 9px 9px 0 0; background: var(--soft); font-size: 19px; font-weight: 800; }
+.podium-person.first .podium-base { height: 78px; background: var(--ink); color: #fff; }
+.podium-person.second .podium-base { height: 58px; }
+.podium-person.third .podium-base { height: 44px; }
+.crown { padding: 3px 8px; border-radius: 20px; background: var(--ink); color: #fff; font-size: 9px; font-weight: 750; letter-spacing: .08em; }
+.rating-list { overflow: hidden; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface); }
+.rating-row { display: flex; align-items: center; gap: 10px; min-height: 66px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+.rating-row:last-child { border-bottom: 0; }
+.rating-number { width: 18px; flex: 0 0 18px; color: var(--muted); font-size: 13px; font-weight: 700; text-align: center; }
+.rating-row .rating-avatar { width: 40px; height: 40px; flex-basis: 40px; font-size: 13px; }
+.rating-row strong { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.rating-amount { flex: 0 0 auto; font-size: 12px; font-weight: 700; text-align: right; }
+.rating-note { margin: 13px 2px 0; color: var(--muted); font-size: 11px; text-align: center; }
+.rating-empty { margin-top: 26px; }
+.rating-page .state .loading-line { margin: 0 auto 12px; }
+@media (max-width: 360px) {
+  .podium { gap: 4px; }
+  .podium-person strong { font-size: 11px; }
+  .podium-person small { font-size: 10px; }
+  .rating-amount { font-size: 11px; }
+}
