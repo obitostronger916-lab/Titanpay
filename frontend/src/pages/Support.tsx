@@ -151,9 +151,9 @@ export default function Support({
       )}
 
       {tickets.map((ticket) => (
-        <div className="card" key={ticket.id}>
+        <div className="card" key={ticketicket.id}>
           <div className="row">
-            <b>MUROJAAT #{ticket.id}</b>
+            <b>MUROJAAT #{ticketicket.id}</b>
             <span className="badge" data-status={ticket.status}>
               {t(STATUS_UZ[ticket.status] || ticket.status)}
             </span>
@@ -178,19 +178,19 @@ export default function Support({
           <div className="mt-l">
             <input
               placeholder="Javob yozing..."
-              value={reply[t.id] || ""}
+              value={reply[ticket.id] || ""}
               onChange={(e) =>
                 setReply((old) => ({
                   ...old,
-                  [t.id]: e.target.value,
+                  [ticket.id]: e.target.value,
                 }))
               }
             />
 
             <button
               className="btn ghost small"
-              disabled={!(reply[t.id] || "").trim()}
-              onClick={() => send(t.id)}
+              disabled={!(reply[ticket.id] || "").trim()}
+              onClick={() => send(ticket.id)}
             >
               {t("Javob yuborish")}
             </button>
