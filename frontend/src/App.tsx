@@ -9,6 +9,7 @@ import { Balance, Orders, Profile, Rules } from "./pages/Simple";
 import Support from "./pages/Support";
 import Admin from "./pages/Admin";
 import Rating from "./pages/Rating";
+import { useLanguage } from "./i18n";
 
 export type Me = { id: number; name: string; balance: number; is_admin: boolean };
 export type Nav = (page: string, ctx?: any) => void;
@@ -34,6 +35,7 @@ const BOTTOM_NAV: [string, IconName, string][] = [
 const SWIPE_MIN = 40;
 
 export default function App() {
+  const { t } = useLanguage();
   const [me, setMe] = useState<Me | null>(null);
   const [error, setError] = useState("");
   const [page, setPage] = useState("home");
@@ -166,10 +168,10 @@ export default function App() {
   };
 
   const titles: Record<string, string> = Object.fromEntries(
-    TILES.map(([key, , title]) => [key, title])
+    TILES.map(([key, , title]) => [key, t(title)])
   );
   titles.admin = "Admin panel";
-  titles.rating = "Top donatchilar";
+  titles.rating = t("Top donatchilar");
 
   if (error) {
     return (
@@ -177,8 +179,8 @@ export default function App() {
         <div className="brand-mark small-mark">T</div>
         <h2>TITANPAY</h2>
         <p className="err">{error}</p>
-        <p className="muted">Mini App’ni Telegram bot ichidagi tugma orqali oching.</p>
-        <button className="btn small" onClick={refresh}>Qayta urinish</button>
+        <p className="muted">{t("Mini App’ni Telegram bot ichidagi tugma orqali oching.")}</p>
+        <button className="btn small" onClick={refresh}>{t("Qayta urinish")}</button>
       </div>
     );
   }
@@ -188,7 +190,7 @@ export default function App() {
       <div className="loading-screen">
         <div className="brand-mark loading-mark">T</div>
         <div className="loading-line"><span /></div>
-        <p className="muted">TITANPAY yuklanmoqda…</p>
+        <p className="muted">{t("TITANPAY yuklanmoqda…")}</p>
       </div>
     );
   }
@@ -198,7 +200,7 @@ export default function App() {
       <div className="splash-screen">
         <div className="logo-stage"><div className="brand-mark splash-mark">T</div></div>
         <div className="splash-title">TITANPAY</div>
-        <div className="splash-subtitle">ONESTATE RP DONAT XIZMATI</div>
+        <div className="splash-subtitle">{t("ONESTATE RP DONAT XIZMATI")}</div>
         <div className="loading-line"><span /></div>
       </div>
     );
@@ -223,18 +225,18 @@ export default function App() {
 
               <section className="welcome-row">
                 <div>
-                  <div className="muted">Xush kelibsiz,</div>
-                  <h1>{me.name || "O‘yinchi"}!</h1>
+                  <div className="muted">{t("Xush kelibsiz,")}</div>
+                  <h1>{me.name || t("O‘yinchi")}!</h1>
                 </div>
                 <div className="avatar-chip"><Icon name="user" /></div>
               </section>
 
               <section className="balance-card home-balance">
-                <div className="eyebrow">Joriy balans</div>
+                <div className="eyebrow">{t("Joriy balans")}</div>
                 <div className="big">{fmt(me.balance)}</div>
                 <div className="row">
-                  <span className="muted">TITAN DONAT hisobi</span>
-                  <button className="btn light small" onClick={() => go("topup")}>To‘ldirish</button>
+                  <span className="muted">{t("TITAN DONAT hisobi")}</span>
+                  <button className="btn light small" onClick={() => go("topup")}>{t("To‘ldirish")}</button>
                 </div>
               </section>
 
@@ -280,53 +282,53 @@ export default function App() {
 
               <section className="section-block">
                 <div className="section-heading">
-                  <div><span className="eyebrow">Tezkor kirish</span><h2>Kerakli bo‘lim</h2></div>
+                  <div><span className="eyebrow">{t("Tezkor kirish")}</span><h2>{t("Kerakli bo‘lim")}</h2></div>
                 </div>
                 <div className="quick-grid">
                   <button className="quick-card" onClick={() => go("balance")}>
                     <span className="quick-icon"><Icon name="wallet" /></span>
-                    <span className="q-title">Balans</span><small>Hisobingiz</small>
+                    <span className="q-title">{t("Balans")}</span><small>{t("Hisobingiz")}</small>
                   </button>
                   <button className="quick-card" onClick={() => go("orders")}>
                     <span className="quick-icon"><Icon name="orders" /></span>
-                    <span className="q-title">Oxirgi xarid</span><small>Buyurtmalar</small>
+                    <span className="q-title">{t("Oxirgi xarid")}</span><small>{t("Buyurtmalar")}</small>
                   </button>
                   <button className="quick-card" onClick={() => go("shop")}>
                     <span className="quick-icon"><Icon name="shop" /></span>
-                    <span className="q-title">ONESTATE donat</span><small>Donat paketlari</small>
+                    <span className="q-title">{t("ONESTATE donat")}</span><small>{t("Donat paketlari")}</small>
                   </button>
                   <button className="quick-card" onClick={() => go("support")}>
                     <span className="quick-icon"><Icon name="support" /></span>
-                    <span className="q-title">Yordam</span><small>Support bilan aloqa</small>
+                    <span className="q-title">{t("Yordam")}</span><small>{t("Support bilan aloqa")}</small>
                   </button>
                 </div>
               </section>
 
               <section className="section-block">
                 <div className="section-heading">
-                  <div><span className="eyebrow">JAMOA</span><h2>Donatchilar reytingi</h2></div>
+                  <div><span className="eyebrow">{t("JAMOA")}</span><h2>{t("Donatchilar reytingi")}</h2></div>
                 </div>
                 <button className="list-btn" onClick={() => go("rating")}>
                   <span className="list-icon"><Icon name="users" /></span>
-                  <span className="list-text"><strong>Top 10 donatchilar</strong><span>Kunlik, oylik va yillik reyting</span></span>
+                  <span className="list-text"><strong>{t("Top 10 donatchilar")}</strong><span>{t("Kunlik, oylik va yillik reyting")}</span></span>
                   <Icon name="chevron" className="list-chev" />
                 </button>
               </section>
 
               <section className="section-block">
                 <div className="section-heading">
-                  <div><span className="eyebrow">ONESTATE RP</span><h2>Donat paketlari</h2></div>
-                  <button className="text-action" onClick={() => go("shop")}>Barchasi</button>
+                  <div><span className="eyebrow">ONESTATE RP</span><h2>{t("Donat paketlari")}</h2></div>
+                  <button className="text-action" onClick={() => go("shop")}>{t("Barchasi")}</button>
                 </div>
                 <button className="list-btn" onClick={() => go("shop")}>
                   <span className="list-icon dark"><Icon name="shop" /></span>
-                  <span className="list-text"><strong>ONESTATE RP</strong><span>Donat va o‘yin xizmatlari</span></span>
+                  <span className="list-text"><strong>ONESTATE RP</strong><span>{t("Donat va o‘yin xizmatlari")}</span></span>
                   <Icon name="chevron" className="list-chev" />
                 </button>
                 {me.is_admin && (
                   <button className="list-btn" onClick={() => go("admin")}>
                     <span className="list-icon"><Icon name="admin" /></span>
-                    <span className="list-text"><strong>Admin panel</strong><span>Boshqaruv markazi</span></span>
+                    <span className="list-text"><strong>Admin panel</strong><span>{t("Boshqaruv markazi")}</span></span>
                     <Icon name="chevron" className="list-chev" />
                   </button>
                 )}
@@ -338,7 +340,7 @@ export default function App() {
                 <button className="back" aria-label="Orqaga" onClick={() => { go("home"); refresh(); }}>
                   <Icon name="back" />
                 </button>
-                <h2 className="page-title">{titles[page] || "TITANPAY"}</h2>
+                <h2 className="page-title">{page === "admin" ? "Admin panel" : (titles[page] || "TITANPAY")}</h2>
               </div>
               {page === "shop" && <Shop me={me} refresh={refresh} go={go} />}
               {page === "balance" && <Balance me={me} />}
@@ -354,10 +356,10 @@ export default function App() {
         </div>
       </main>
 
-      <nav className="bottom-nav" aria-label="Asosiy navigatsiya">
+      <nav className="bottom-nav" aria-label={t("Asosiy navigatsiya")}>
         {BOTTOM_NAV.map(([key, icon, label]) => (
           <button key={key} className={`nav-item ${page === key ? "active" : ""}`} onClick={() => go(key)}>
-            <span className="nav-icon"><Icon name={icon} size={22} /></span><span>{label}</span>
+            <span className="nav-icon"><Icon name={icon} size={22} /></span><span>{t(label)}</span>
           </button>
         ))}
       </nav>

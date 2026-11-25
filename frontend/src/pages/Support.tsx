@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api, STATUS_UZ } from "../api";
 import { Icon } from "../icons";
 
+import { useLanguage } from "../i18n";
 type Ticket = {
   id: string;
   status: string;
@@ -16,6 +17,7 @@ export default function Support({
 }: {
   ctx: { payment_id?: string; order_id?: string } | null;
 }) {
+  const { t } = useLanguage();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [text, setText] = useState("");
   const [err, setErr] = useState("");
@@ -75,9 +77,9 @@ export default function Support({
     <>
       <div className="mb-l">
         <div className="eyebrow">TITAN DONAT • ONESTATE RP</div>
-        <h2 className="mt-s mb-s">Yordam markazi</h2>
+        <h2 className="mt-s mb-s">{t("Yordam markazi")}</h2>
         <div className="muted">
-          Savol yoki muammo bo'lsa, admin bilan bog'laning.
+          {t("Savol yoki muammo bo'lsa, admin bilan bog'laning.")}
         </div>
       </div>
 
@@ -85,34 +87,34 @@ export default function Support({
         <div className="row">
           <div>
             <div className="eyebrow">TITAN SUPPORT</div>
-            <h3 className="mt-s mb-s">Biz sizga yordam beramiz</h3>
+            <h3 className="mt-s mb-s">{t("Biz sizga yordam beramiz")}</h3>
           </div>
           <Icon name="support" size={32} />
         </div>
 
         <p className="muted m0">
-          Murojaatingizni yozing. Javob kelganda shu sahifada ko'rishingiz mumkin.
+          {t("Murojaatingizni yozing. Javob kelganda shu sahifada ko'rishingiz mumkin.")}
         </p>
       </div>
 
       <div className="card">
-        <h3>Yangi murojaat</h3>
+        <h3>{t("Yangi murojaat")}</h3>
 
         {ctx?.payment_id && (
           <div className="badge mb-m">
-            To'lov #{ctx.payment_id}
+            {t("To'lov")} #{ctx.payment_id}
           </div>
         )}
 
         {ctx?.order_id && (
           <div className="badge mb-m">
-            Buyurtma #{ctx.order_id}
+            {t("Buyurtma")} #{ctx.order_id}
           </div>
         )}
 
         <textarea
           rows={4}
-          placeholder="Muammo yoki savolingizni yozing..."
+          placeholder={t("Muammo yoki savolingizni yozing...")}
           value={text}
           maxLength={2000}
           onChange={(e) => setText(e.target.value)}
@@ -120,7 +122,7 @@ export default function Support({
         />
 
         <div className="row muted mb-m">
-          <span>Kamida 3 ta belgi</span>
+          <span>{t("Kamida 3 ta belgi")}</span>
           <span>{text.length}/2000</span>
         </div>
 
@@ -131,42 +133,42 @@ export default function Support({
           disabled={busy || text.trim().length < 3}
           onClick={create}
         >
-          <Icon name="message" size={18} /> {busy ? "Yuborilmoqda..." : "Murojaat yuborish"}
+          <Icon name="message" size={18} /> {busy ? t("Yuborilmoqda...") : t("Murojaat yuborish")}
         </button>
       </div>
 
       <div className="row mt-l mb-m">
-        <h3 className="m0">Murojaatlarim</h3>
-        <span className="badge">{tickets.length} ta</span>
+        <h3 className="m0">{t("Murojaatlarim")}</h3>
+        <span className="badge">{tickets.length} {t("ta")}</span>
       </div>
 
       {tickets.length === 0 && (
         <div className="card state">
           <div className="state-icon"><Icon name="message" size={22} /></div>
-          <b>Murojaatlar mavjud emas</b>
-          <p>Yangi murojaat yuborsangiz, shu yerda ko'rinadi.</p>
+          <b>{t("Murojaatlar mavjud emas")}</b>
+          <p>{t("Yangi murojaat yuborsangiz, shu yerda ko'rinadi.")}</p>
         </div>
       )}
 
-      {tickets.map((t) => (
-        <div className="card" key={t.id}>
+      {tickets.map((ticket) => (
+        <div className="card" key={ticket.id}>
           <div className="row">
-            <b>MUROJAAT #{t.id}</b>
-            <span className="badge" data-status={t.status}>
-              {STATUS_UZ[t.status] || t.status}
+            <b>{t("MUROJAAT")} #{ticket.id}</b>
+            <span className="badge" data-status={ticket.status}>
+              {t(STATUS_UZ[ticket.status] || ticket.status)}
             </span>
           </div>
 
           <div className="divider" />
 
           <div className="msgs" style={{ marginTop: 0 }}>
-            {(t.messages || []).map((m, i) => (
+            {(ticket.messages || []).map((m, i) => (
               <div
                 key={i}
                 className={`msg ${m.admin ? "admin" : ""}`}
               >
                 <div className="muted" style={{ fontSize: 11, marginBottom: 5 }}>
-                  {m.admin ? "ADMIN" : "SIZ"}
+                  {m.admin ? "ADMIN" : t("SIZ")}
                 </div>
                 {m.text}
               </div>
@@ -175,22 +177,22 @@ export default function Support({
 
           <div className="mt-l">
             <input
-              placeholder="Javob yozing..."
-              value={reply[t.id] || ""}
+              placeholder={t("Javob yozing...")}
+              value={reply[ticket.id] || ""}
               onChange={(e) =>
                 setReply((old) => ({
                   ...old,
-                  [t.id]: e.target.value,
+                  [ticket.id]: e.target.value,
                 }))
               }
             />
 
             <button
               className="btn ghost small"
-              disabled={!(reply[t.id] || "").trim()}
-              onClick={() => send(t.id)}
+              disabled={!(reply[ticket.id] || "").trim()}
+              onClick={() => send(ticket.id)}
             >
-              Javob yuborish
+              {t("Javob yuborish")}
             </button>
           </div>
         </div>

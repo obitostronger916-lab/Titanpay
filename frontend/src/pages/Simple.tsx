@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api, fmt, STATUS_UZ } from "../api";
 import { Icon } from "../icons";
 import type { Me, Nav } from "../App";
-
+import { useLanguage } from "../i18n";
 const KIND_UZ: Record<string, string> = {
   topup: "Balans to'ldirildi",
   purchase: "Xarid",
@@ -12,6 +12,7 @@ const KIND_UZ: Record<string, string> = {
 };
 
 export function Balance({ me }: { me: Me }) {
+  const { t } = useLanguage();
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,23 +26,23 @@ export function Balance({ me }: { me: Me }) {
   return (
     <>
       <div className="balance-card">
-        <div className="eyebrow">SIZNING JORIY BALANSINGIZ</div>
+        <div className="eyebrow">{t("SIZNING JORIY BALANSINGIZ")}</div>
         <div className="big">{fmt(me.balance)}</div>
         <div className="muted mt-s">UZS · TITAN DONAT</div>
       </div>
 
       <div className="row mt-l mb-m">
-        <h3 className="m0">Balans tarixi</h3>
-        <span className="muted">{rows.length} ta operatsiya</span>
+        <h3 className="m0">{t("Balans tarixi")}</h3>
+        <span className="muted">{rows.length} {t("ta operatsiya")}</span>
       </div>
 
-      {loading && <div className="muted">Tarix yuklanmoqda...</div>}
+      {loading && <div className="muted">{t("Tarix yuklanmoqda...")}</div>}
 
       {!loading && rows.length === 0 && (
         <div className="card state">
           <div className="state-icon"><Icon name="wallet" size={22} /></div>
-          <b>Hozircha operatsiyalar yo'q</b>
-          <p>Balansingizdagi o'zgarishlar shu yerda chiqadi.</p>
+          <b>{t("Hozircha operatsiyalar yo'q")}</b>
+          <p>{t("Balansingizdagi o'zgarishlar shu yerda chiqadi.")}</p>
         </div>
       )}
 
@@ -49,7 +50,7 @@ export function Balance({ me }: { me: Me }) {
         <div className="card" key={r.id ?? i}>
           <div className="row">
             <div>
-              <b>{KIND_UZ[r.kind] || r.kind}</b>
+              <b>{t(KIND_UZ[r.kind] || r.kind)}</b>
               <div className="muted mt-s">
                 {new Date(r.created_at).toLocaleString()}
               </div>
@@ -76,6 +77,7 @@ export function Balance({ me }: { me: Me }) {
 }
 
 export function Orders({ go }: { go: Nav }) {
+  const { t } = useLanguage();
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -90,17 +92,17 @@ export function Orders({ go }: { go: Nav }) {
     <>
       <div className="mb-l">
         <div className="eyebrow">TITAN DONAT</div>
-        <h2 className="mt-s mb-s">Buyurtmalarim</h2>
-        <div className="muted">Barcha buyurtmalaringiz tarixi.</div>
+        <h2 className="mt-s mb-s">{t("Buyurtmalarim")}</h2>
+        <div className="muted">{t("Barcha buyurtmalaringiz tarixi.")}</div>
       </div>
 
-      {loading && <div className="muted">Buyurtmalar yuklanmoqda...</div>}
+      {loading && <div className="muted">{t("Buyurtmalar yuklanmoqda...")}</div>}
 
       {!loading && rows.length === 0 && (
         <div className="card state">
           <div className="state-icon"><Icon name="box" size={22} /></div>
-          <b>Buyurtmalar hali yo'q</b>
-          <p>Donat do'konidan mahsulot tanlashingiz mumkin.</p>
+          <b>{t("Buyurtmalar hali yo'q")}</b>
+          <p>{t("Donat do'konidan mahsulot tanlashingiz mumkin.")}</p>
         </div>
       )}
 
@@ -109,7 +111,7 @@ export function Orders({ go }: { go: Nav }) {
           <div className="row">
             <b>Buyurtma #{o.id}</b>
             <span className="badge" data-status={o.status}>
-              {STATUS_UZ[o.status] || o.status}
+              {t(STATUS_UZ[o.status] || o.status)}
             </span>
           </div>
 
@@ -132,7 +134,7 @@ export function Orders({ go }: { go: Nav }) {
             className="btn ghost mt-m"
             onClick={() => go("support", { order_id: o.id })}
           >
-            <Icon name="support" size={18} /> Buyurtma bo'yicha yordam
+            <Icon name="support" size={18} /> {t("Buyurtma bo'yicha yordam")}
           </button>
         </div>
       ))}
@@ -141,6 +143,7 @@ export function Orders({ go }: { go: Nav }) {
 }
 
 export function Profile({ me, go }: { me: Me; go: Nav }) {
+  const { language, setLanguage, t } = useLanguage();
   return (
     <>
       <div className="balance-card" style={{ textAlign: "center", padding: 24 }}>
@@ -149,14 +152,23 @@ export function Profile({ me, go }: { me: Me; go: Nav }) {
         <h2 className="mb-s">{me.name || "O'yinchi"}</h2>
         <div className="muted">ONESTATE ROLEPLAY</div>
         <div className="big mt-l">{fmt(me.balance)}</div>
-        <div className="muted">Mavjud balans · UZS</div>
+        <div className="muted">{t("Mavjud balans · UZS")}</div>
       </div>
 
       <div className="card">
-        <h3>Profil ma'lumotlari</h3>
+        <h3>{t("Til / Language")}</h3>
+        <select aria-label={t("Ilova tili")} value={language} onChange={(e) => setLanguage(e.target.value as "uz" | "ru" | "en")}>
+          <option value="uz">🇺🇿 O‘zbekcha</option>
+          <option value="ru">🇷🇺 Русский</option>
+          <option value="en">🇬🇧 English</option>
+        </select>
+      </div>
+
+      <div className="card">
+        <h3>{t("Profil ma'lumotlari")}</h3>
 
         <div className="info-row">
-          <span className="muted">Ism</span>
+          <span className="muted">{t("Ism")}</span>
           <b>{me.name || "-"}</b>
         </div>
 
@@ -166,8 +178,8 @@ export function Profile({ me, go }: { me: Me; go: Nav }) {
         </div>
 
         <div className="info-row">
-          <span className="muted">Hisob holati</span>
-          <span className="badge on">Faol</span>
+          <span className="muted">{t("Hisob holati")}</span>
+          <span className="badge on">{t("Faol")}</span>
         </div>
 
         {me.is_admin && (
@@ -180,17 +192,17 @@ export function Profile({ me, go }: { me: Me; go: Nav }) {
 
       <button className="list-btn" onClick={() => go("balance")}>
         <span className="list-icon"><Icon name="wallet" /></span>
-        <span className="list-text"><strong>Balans tarixi</strong><span>Barcha operatsiyalar</span></span>
+        <span className="list-text"><strong>{t("Balans tarixi")}</strong><span>{t("Barcha operatsiyalar")}</span></span>
         <Icon name="chevron" className="list-chev" />
       </button>
       <button className="list-btn" onClick={() => go("support")}>
         <span className="list-icon"><Icon name="support" /></span>
-        <span className="list-text"><strong>Yordam</strong><span>Support bilan aloqa</span></span>
+        <span className="list-text"><strong>{t("Yordam")}</strong><span>{t("Support bilan aloqa")}</span></span>
         <Icon name="chevron" className="list-chev" />
       </button>
       <button className="list-btn" onClick={() => go("rules")}>
         <span className="list-icon"><Icon name="rules" /></span>
-        <span className="list-text"><strong>Qoidalar</strong><span>Foydalanish qoidalari</span></span>
+        <span className="list-text"><strong>{t("Qoidalar")}</strong><span>{t("Foydalanish qoidalari")}</span></span>
         <Icon name="chevron" className="list-chev" />
       </button>
       {me.is_admin && (
@@ -205,6 +217,7 @@ export function Profile({ me, go }: { me: Me; go: Nav }) {
 }
 
 export function Rules() {
+  const { t } = useLanguage();
   const rules = [
     "To'lov UzCard va Humo orqali amalga oshirilishi ko'zda tutilgan.",
     "To'lovda aynan ko'rsatilgan summani yuboring. Farq bo'lsa, support orqali tekshiruv talab qilinishi mumkin.",
@@ -219,9 +232,9 @@ export function Rules() {
     <>
       <div className="mb-l">
         <div className="eyebrow">TITAN DONAT</div>
-        <h2 className="mt-s mb-s">Foydalanish qoidalari</h2>
+        <h2 className="mt-s mb-s">{t("Foydalanish qoidalari")}</h2>
         <div className="muted">
-          Xarid va to'lovdan oldin qoidalar bilan tanishing.
+          {t("Xarid va to'lovdan oldin qoidalar bilan tanishing.")}
         </div>
       </div>
 
@@ -234,7 +247,7 @@ export function Rules() {
             >
               {i + 1}
             </span>
-            <div style={{ flex: 1, lineHeight: 1.55 }}>{rule}</div>
+            <div style={{ flex: 1, lineHeight: 1.55 }}>{t(rule)}</div>
           </div>
         </div>
       ))}

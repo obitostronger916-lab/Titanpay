@@ -4,6 +4,7 @@ import { api, fmt } from "../api";
 import { Icon } from "../icons";
 import type { Me, Nav } from "../App";
 
+import { useLanguage } from "../i18n";
 type Product = {
   id: number;
   name: string;
@@ -28,6 +29,7 @@ export default function Shop({
   refresh: () => void;
   go: Nav;
 }) {
+  const { t } = useLanguage();
   const [items, setItems] = useState<Product[]>([]);
   const [cat, setCat] = useState("Hammasi");
   const [sel, setSel] = useState<Product | null>(null);
@@ -95,9 +97,9 @@ export default function Shop({
     <>
       <div className="mb-l">
         <div className="eyebrow">ONESTATE ROLEPLAY</div>
-        <h2 className="mt-s mb-s">Donat do'koni</h2>
+        <h2 className="mt-s mb-s">{t("Donat do'koni")}</h2>
         <div className="muted">
-          Kerakli paketni tanlang va buyurtma bering.
+          {t("Kerakli paketni tanlang va buyurtma bering.")}
         </div>
       </div>
 
@@ -113,7 +115,7 @@ export default function Shop({
               go("orders");
             }}
           >
-            Buyurtmalarni ko'rish
+            {t("Buyurtmalarni ko'rish")}
           </button>
         </div>
       )}
@@ -121,8 +123,8 @@ export default function Shop({
       {err && !sel && <div className="err">{err}</div>}
 
       <div className="row mt-l mb-m">
-        <h3 className="m0">Paketlar</h3>
-        <span className="muted">{items.length} ta mahsulot</span>
+        <h3 className="m0">{t("Paketlar")}</h3>
+        <span className="muted">{items.length} {t("ta mahsulot")}</span>
       </div>
 
       <div className="chips">
@@ -132,7 +134,7 @@ export default function Shop({
             className={`chip ${c === cat ? "on" : ""}`}
             onClick={() => setCat(c)}
           >
-            {c}
+            {c === "Hammasi" ? t("Hammasi") : c}
           </button>
         ))}
       </div>
@@ -140,15 +142,15 @@ export default function Shop({
       {loading && (
         <div className="card state">
           <div className="loading-line" style={{ margin: "0 auto 10px" }}><span /></div>
-          Mahsulotlar yuklanmoqda...
+          {t("Mahsulotlar yuklanmoqda...")}
         </div>
       )}
 
       {!loading && shown.length === 0 && (
         <div className="card state">
           <div className="state-icon"><Icon name="box" size={22} /></div>
-          <b>Hozircha mahsulotlar yo'q</b>
-          <p>Yangi paketlar tez orada qo'shiladi.</p>
+          <b>{t("Hozircha mahsulotlar yo'q")}</b>
+          <p>{t("Yangi paketlar tez orada qo'shiladi.")}</p>
         </div>
       )}
 
@@ -183,7 +185,7 @@ export default function Shop({
                   setDone("");
                 }}
               >
-                Tanlash
+                {t("Tanlash")}
               </button>
             </div>
           </div>
@@ -201,35 +203,35 @@ export default function Shop({
             <div className="sheet-body">
               <div className="sheet-handle" />
 
-              <div className="eyebrow">TANLANGAN MAHSULOT</div>
+              <div className="eyebrow">{t("TANLANGAN MAHSULOT")}</div>
               <h3 className="mt-s mb-m">{sel.name}</h3>
 
               <div className="card">
                 <div className="row">
-                  <span className="muted">Mahsulot narxi</span>
+                  <span className="muted">{t("Mahsulot narxi")}</span>
                   <b className="price">{fmt(sel.price)}</b>
                 </div>
                 <div className="row mt-m">
-                  <span className="muted">Sizning balansingiz</span>
+                  <span className="muted">{t("Sizning balansingiz")}</span>
                   <b>{fmt(me.balance)}</b>
                 </div>
               </div>
 
               <div className="onestate-fields">
                 <div className="row mb-s">
-                  <b>ONESTATE RP akkaunt ma'lumotlari</b>
-                  <button type="button" className="text-action" onClick={() => setShowHelp((v) => !v)}>Qayerdan olinadi?</button>
+                  <b>{t("ONESTATE RP akkaunt ma'lumotlari")}</b>
+                  <button type="button" className="text-action" onClick={() => setShowHelp((v) => !v)}>{t("Qayerdan olinadi?")}</button>
                 </div>
                 {showHelp && <div className="msg mb-m">1. O'yinda Settings bo'limini oching.<br />2. Account yoki Profile bo'limiga kiring.<br />3. Client ID va Privacy ID ma'lumotlarini topib nusxalang.<br />4. Character name — tanlangan serverdagi personaj nomi.</div>}
                 <label htmlFor="f-client">Client ID *</label>
-                <input id="f-client" placeholder="Client ID" value={clientId} onChange={(e) => setClientId(e.target.value)} onFocus={focusIntoView} disabled={busy} autoComplete="off" />
+                <input id="f-client" placeholder={t("Client ID")} value={clientId} onChange={(e) => setClientId(e.target.value)} onFocus={focusIntoView} disabled={busy} autoComplete="off" />
                 <label htmlFor="f-privacy">Privacy ID *</label>
-                <input id="f-privacy" placeholder="Privacy ID" value={privacyId} onChange={(e) => setPrivacyId(e.target.value)} onFocus={focusIntoView} disabled={busy} autoComplete="off" />
+                <input id="f-privacy" placeholder={t("Privacy ID")} value={privacyId} onChange={(e) => setPrivacyId(e.target.value)} onFocus={focusIntoView} disabled={busy} autoComplete="off" />
                 <label htmlFor="f-character">Character name *</label>
-                <input id="f-character" placeholder="O'yindagi personaj nomi" value={characterName} onChange={(e) => setCharacterName(e.target.value)} onFocus={focusIntoView} disabled={busy} autoComplete="off" />
+                <input id="f-character" placeholder={t("O'yindagi personaj nomi")} value={characterName} onChange={(e) => setCharacterName(e.target.value)} onFocus={focusIntoView} disabled={busy} autoComplete="off" />
                 <label htmlFor="f-server">Server *</label>
                 <select id="f-server" value={server} onChange={(e) => setServer(e.target.value)} disabled={busy}>
-                  <option value="">Serverni tanlang</option>
+                  <option value="">{t("Serverni tanlang")}</option>
                   {servers.map((name) => <option key={name} value={name}>{name}</option>)}
                 </select>
               </div>
@@ -246,7 +248,7 @@ export default function Shop({
                     go("topup");
                   }}
                 >
-                  Balansni to'ldirish
+                  {t("Balansni to'ldirish")}
                 </button>
               ) : (
                 <button
@@ -254,7 +256,7 @@ export default function Shop({
                   disabled={busy || !clientId.trim() || !privacyId.trim() || !characterName.trim() || !server}
                   onClick={buy}
                 >
-                  {busy ? "Buyurtma yuborilmoqda..." : "Xaridni tasdiqlash"}
+                  {busy ? t("Buyurtma yuborilmoqda...") : t("Xaridni tasdiqlash")}
                 </button>
               )}
 
@@ -263,11 +265,11 @@ export default function Shop({
                 disabled={busy}
                 onClick={() => setSel(null)}
               >
-                Bekor qilish
+                {t("Bekor qilish")}
               </button>
 
               <p className="muted m0" style={{ textAlign: "center" }}>
-                Buyurtma holatini Buyurtmalar bo'limidan tekshirishingiz mumkin.
+                {t("Buyurtma holatini Buyurtmalar bo'limidan tekshirishingiz mumkin.")}
               </p>
             </div>
           </div>
