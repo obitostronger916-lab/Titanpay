@@ -134,7 +134,7 @@ export default function Shop({
             className={`chip ${c === cat ? "on" : ""}`}
             onClick={() => setCat(c)}
           >
-            {c}
+            {c === "Hammasi" ? t("Hammasi") : c}
           </button>
         ))}
       </div>
@@ -224,11 +224,11 @@ export default function Shop({
                 </div>
                 {showHelp && <div className="msg mb-m">1. O'yinda Settings bo'limini oching.<br />2. Account yoki Profile bo'limiga kiring.<br />3. Client ID va Privacy ID ma'lumotlarini topib nusxalang.<br />4. Character name — tanlangan serverdagi personaj nomi.</div>}
                 <label htmlFor="f-client">Client ID *</label>
-                <input id="f-client" placeholder="Client ID" value={clientId} onChange={(e) => setClientId(e.target.value)} onFocus={focusIntoView} disabled={busy} autoComplete="off" />
+                <input id="f-client" placeholder={t("Client ID")} value={clientId} onChange={(e) => setClientId(e.target.value)} onFocus={focusIntoView} disabled={busy} autoComplete="off" />
                 <label htmlFor="f-privacy">Privacy ID *</label>
-                <input id="f-privacy" placeholder="Privacy ID" value={privacyId} onChange={(e) => setPrivacyId(e.target.value)} onFocus={focusIntoView} disabled={busy} autoComplete="off" />
+                <input id="f-privacy" placeholder={t("Privacy ID")} value={privacyId} onChange={(e) => setPrivacyId(e.target.value)} onFocus={focusIntoView} disabled={busy} autoComplete="off" />
                 <label htmlFor="f-character">Character name *</label>
-                <input id="f-character" placeholder="O'yindagi personaj nomi" value={characterName} onChange={(e) => setCharacterName(e.target.value)} onFocus={focusIntoView} disabled={busy} autoComplete="off" />
+                <input id="f-character" placeholder={t("O'yindagi personaj nomi")} value={characterName} onChange={(e) => setCharacterName(e.target.value)} onFocus={focusIntoView} disabled={busy} autoComplete="off" />
                 <label htmlFor="f-server">Server *</label>
                 <select id="f-server" value={server} onChange={(e) => setServer(e.target.value)} disabled={busy}>
                   <option value="">{t("Serverni tanlang")}</option>
@@ -248,7 +248,7 @@ export default function Shop({
                     go("topup");
                   }}
                 >
-                  Balansni to'ldirish
+                  {t("Balansni to'ldirish")}
                 </button>
               ) : (
                 <button
@@ -256,7 +256,7 @@ export default function Shop({
                   disabled={busy || !clientId.trim() || !privacyId.trim() || !characterName.trim() || !server}
                   onClick={buy}
                 >
-                  {busy ? "Buyurtma yuborilmoqda..." : "Xaridni tasdiqlash"}
+                  {busy ? t("Buyurtma yuborilmoqda...") : t("Xaridni tasdiqlash")}
                 </button>
               )}
 
