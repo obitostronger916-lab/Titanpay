@@ -102,19 +102,19 @@ export default function Support({
 
         {ctx?.payment_id && (
           <div className="badge mb-m">
-            To'lov #{ctx.payment_id}
+            {t("To'lov")} #{ctx.payment_id}
           </div>
         )}
 
         {ctx?.order_id && (
           <div className="badge mb-m">
-            Buyurtma #{ctx.order_id}
+            {t("Buyurtma")} #{ctx.order_id}
           </div>
         )}
 
         <textarea
           rows={4}
-          placeholder="Muammo yoki savolingizni yozing..."
+          placeholder={t("Muammo yoki savolingizni yozing...")}
           value={text}
           maxLength={2000}
           onChange={(e) => setText(e.target.value)}
@@ -133,13 +133,13 @@ export default function Support({
           disabled={busy || text.trim().length < 3}
           onClick={create}
         >
-          <Icon name="message" size={18} /> {busy ? "Yuborilmoqda..." : "Murojaat yuborish"}
+          <Icon name="message" size={18} /> {busy ? t("Yuborilmoqda...") : t("Murojaat yuborish")}
         </button>
       </div>
 
       <div className="row mt-l mb-m">
         <h3 className="m0">{t("Murojaatlarim")}</h3>
-        <span className="badge">{tickets.length} ta</span>
+        <span className="badge">{tickets.length} {t("ta")}</span>
       </div>
 
       {tickets.length === 0 && (
@@ -153,7 +153,7 @@ export default function Support({
       {tickets.map((ticket) => (
         <div className="card" key={ticket.id}>
           <div className="row">
-            <b>MUROJAAT #{ticket.id}</b>
+            <b>{t("MUROJAAT")} #{ticket.id}</b>
             <span className="badge" data-status={ticket.status}>
               {t(STATUS_UZ[ticket.status] || ticket.status)}
             </span>
@@ -168,7 +168,7 @@ export default function Support({
                 className={`msg ${m.admin ? "admin" : ""}`}
               >
                 <div className="muted" style={{ fontSize: 11, marginBottom: 5 }}>
-                  {m.admin ? "ADMIN" : "SIZ"}
+                  {m.admin ? "ADMIN" : t("SIZ")}
                 </div>
                 {m.text}
               </div>
@@ -177,7 +177,7 @@ export default function Support({
 
           <div className="mt-l">
             <input
-              placeholder="Javob yozing..."
+              placeholder={t("Javob yozing...")}
               value={reply[ticket.id] || ""}
               onChange={(e) =>
                 setReply((old) => ({
