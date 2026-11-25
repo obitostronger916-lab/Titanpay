@@ -3,8 +3,6 @@ import { api, fmt, STATUS_UZ } from "../api";
 import { Icon } from "../icons";
 import type { Me, Nav } from "../App";
 import { useLanguage } from "../i18n";
-
-import { useLanguage } from "../i18n";
 const KIND_UZ: Record<string, string> = {
   topup: "Balans to'ldirildi",
   purchase: "Xarid",
