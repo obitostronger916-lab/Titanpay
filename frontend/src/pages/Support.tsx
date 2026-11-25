@@ -150,19 +150,19 @@ export default function Support({
         </div>
       )}
 
-      {tickets.map((t) => (
-        <div className="card" key={t.id}>
+      {tickets.map((ticket) => (
+        <div className="card" key={ticket.id}>
           <div className="row">
-            <b>MUROJAAT #{t.id}</b>
-            <span className="badge" data-status={t.status}>
-              {t(STATUS_UZ[t.status] || t.status)}
+            <b>MUROJAAT #{ticket.id}</b>
+            <span className="badge" data-status={ticket.status}>
+              {t(STATUS_UZ[ticket.status] || ticket.status)}
             </span>
           </div>
 
           <div className="divider" />
 
           <div className="msgs" style={{ marginTop: 0 }}>
-            {(t.messages || []).map((m, i) => (
+            {(ticket.messages || []).map((m, i) => (
               <div
                 key={i}
                 className={`msg ${m.admin ? "admin" : ""}`}
