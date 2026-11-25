@@ -151,9 +151,9 @@ export default function Support({
       )}
 
       {tickets.map((ticket) => (
-        <div className="card" key={ticketicket.id}>
+        <div className="card" key={ticket.id}>
           <div className="row">
-            <b>MUROJAAT #{ticketicket.id}</b>
+            <b>MUROJAAT #{ticket.id}</b>
             <span className="badge" data-status={ticket.status}>
               {t(STATUS_UZ[ticket.status] || ticket.status)}
             </span>
