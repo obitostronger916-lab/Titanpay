@@ -89,22 +89,22 @@ export default function Topup({ go }: { go: Nav }) {
       </div>
 
       <div className="card">
-        <h3>To'lov tizimlari</h3>
+        <h3>{t("To'lov tizimlari")}</h3>
         {!paymentStatusLoaded ? (
-          <p className="muted m0">To'lov tizimi holati tekshirilmoqda...</p>
+          <p className="muted m0">{t("To'lov tizimi holati tekshirilmoqda...")}</p>
         ) : paymentAvailable ? (
-          <p className="muted m0">To'lov provayderi ulangan. To'lovni davom ettirishingiz mumkin.</p>
+          <p className="muted m0">{t("To'lov provayderi ulangan. To'lovni davom ettirishingiz mumkin.")}</p>
         ) : (
           <p className="muted m0">
-            UzCard/Humo provayderi hali ulanmagan. Xizmat tayyor bo'lmaguncha to'lov yaratish yopiq.
+            {t("UzCard/Humo provayderi hali ulanmagan. Xizmat tayyor bo'lmaguncha to'lov yaratish yopiq.")}
           </p>
         )}
       </div>
 
       <div className="card">
-        <h3>To'lov summasi</h3>
+        <h3>{t("To'lov summasi")}</h3>
         <div className="muted mb-m">
-          Summani UZS da kiriting. Minimal summa — 1 000 UZS.
+          {t("Summani UZS da kiriting. Minimal summa — 1 000 UZS.")}
         </div>
 
         <input
@@ -148,16 +148,16 @@ export default function Topup({ go }: { go: Nav }) {
 
       {info && (
         <div className="card strong">
-          <div className="badge on">TO'LOV YARATILDI</div>
-          <h3 className="mt-m">To'lov ma'lumotlari</h3>
+          <div className="badge on">{t("TO'LOV YARATILDI")}</div>
+          <h3 className="mt-m">{t("To'lov ma'lumotlari")}</h3>
 
           <div className="row mt-m">
-            <span className="muted">To'lov ID</span>
+            <span className="muted">{t("To'lov ID")}</span>
             <b>{info.payment_id}</b>
           </div>
 
           <div className="row mt-m">
-            <span className="muted">To'lanadigan summa</span>
+            <span className="muted">{t("To'lanadigan summa")}</span>
             <b className="price">{fmt(info.amount)}</b>
           </div>
 
@@ -179,25 +179,25 @@ export default function Topup({ go }: { go: Nav }) {
               className="btn mt-l"
               onClick={() => openPayment(info.pay_url)}
             >
-              To'lovga o'tish
+              {t("To'lovga o'tish")}
             </button>
           )}
 
           <p className="muted mt-m m0">
-            To'lov holati tasdiqlanmaguncha balansga mablag' qo'shilmaydi.
+            {t("To'lov holati tasdiqlanmaguncha balansga mablag' qo'shilmaydi.")}
           </p>
         </div>
       )}
 
       <div className="row mt-l mb-m">
-        <h3 className="m0">To'lovlar tarixi</h3>
+        <h3 className="m0">{t("To'lovlar tarixi")}</h3>
         <span className="muted">{list.length} ta</span>
       </div>
 
       {list.length === 0 && (
         <div className="card state">
           <div className="state-icon"><Icon name="card" size={22} /></div>
-          <b>Hozircha to'lovlar mavjud emas</b>
+          <b>{t("Hozircha to'lovlar mavjud emas")}</b>
         </div>
       )}
 
@@ -211,13 +211,13 @@ export default function Topup({ go }: { go: Nav }) {
           </div>
 
           <div className="row mt-m">
-            <span className="muted">Kutilgan summa</span>
+            <span className="muted">{t("Kutilgan summa")}</span>
             <b className="price">{fmt(p.expected)}</b>
           </div>
 
           {p.paid != null && (
             <div className="row mt-s">
-              <span className="muted">To'langan</span>
+              <span className="muted">{t("To'langan")}</span>
               <b>{fmt(p.paid)}</b>
             </div>
           )}
@@ -233,7 +233,7 @@ export default function Topup({ go }: { go: Nav }) {
                 go("support", { payment_id: p.id })
               }
             >
-              Muammo haqida yozish
+              {t("Muammo haqida yozish")}
             </button>
           )}
         </div>
