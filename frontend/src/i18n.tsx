@@ -149,7 +149,19 @@ const translations: Record<Language, Record<string, string>> = {
     "Rad etildi":"Отклонён",
     "To'landi":"Оплачен",
     "Muddati tugadi":"Срок истёк",
-    "Tekshiruvda":"На проверке"
+    "Tekshiruvda":"На проверке",
+    "To'lov tasdiqlandi":"Платёж подтверждён",
+    "Navbatda":"В очереди",
+    "Xatolik":"Ошибка",
+    "Yaratildi":"Создано",
+    "Balansga yozildi":"Зачислено на баланс",
+    "Summa mos emas (tekshiruvda)":"Сумма не совпадает (проверка)",
+    "Muddati tugagan":"Срок истёк",
+    "Tasdiqlandi (balansga)":"Подтверждено (на баланс)",
+    "Ochiq":"Открыто",
+    "Javob berilgan":"Есть ответ",
+    "Xatolik (":"Ошибка (",
+    "Kiritilgan ma'lumot noto'g'ri":"Введены неверные данные"
   },
   en: {
     "Donat do‘koni":"Donation shop","Balans":"Balance","Balansni to‘ldirish":"Top up balance","Buyurtmalar":"Orders","Profil":"Profile","Yordam":"Support","Qoidalar":"Rules","Bosh sahifa":"Home","Do‘kon":"Shop","Tarix":"History","To‘ldirish":"Top up","Top donatchilar":"Top donors",
@@ -290,7 +302,19 @@ const translations: Record<Language, Record<string, string>> = {
     "Rad etildi":"Rejected",
     "To'landi":"Paid",
     "Muddati tugadi":"Expired",
-    "Tekshiruvda":"Under review"
+    "Tekshiruvda":"Under review",
+    "To'lov tasdiqlandi":"Payment confirmed",
+    "Navbatda":"Queued",
+    "Xatolik":"Error",
+    "Yaratildi":"Created",
+    "Balansga yozildi":"Credited to balance",
+    "Summa mos emas (tekshiruvda)":"Amount mismatch (under review)",
+    "Muddati tugagan":"Expired",
+    "Tasdiqlandi (balansga)":"Confirmed (credited)",
+    "Ochiq":"Open",
+    "Javob berilgan":"Answered",
+    "Xatolik (":"Error (",
+    "Kiritilgan ma'lumot noto'g'ri":"The entered information is invalid"
   }
 };
 
