@@ -82,9 +82,9 @@ export default function Topup({ go }: { go: Nav }) {
     <>
       <div className="mb-l">
         <div className="eyebrow">ONESTATE ROLEPLAY</div>
-        <h2 className="mt-s mb-s">Balansni to'ldirish</h2>
+        <h2 className="mt-s mb-s">{t("Balansni to'ldirish")}</h2>
         <div className="muted">
-          UzCard va Humo orqali to'lov xizmati holati quyida ko'rsatiladi.
+          {t("UzCard va Humo orqali to'lov xizmati holati quyida ko'rsatiladi.")}
         </div>
       </div>
 
@@ -112,7 +112,7 @@ export default function Topup({ go }: { go: Nav }) {
           inputMode="numeric"
           min="1000"
           step="1000"
-          placeholder="Masalan: 50000"
+          placeholder={t("Masalan: 50000")}
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           disabled={busy || !paymentAvailable}
@@ -142,7 +142,7 @@ export default function Topup({ go }: { go: Nav }) {
           }
           onClick={create}
         >
-          {busy ? "Yaratilmoqda..." : paymentAvailable ? "To'lov yaratish" : "Provayder ulanmagan"}
+          {busy ? t("Yaratilmoqda...") : paymentAvailable ? t("To'lov yaratish") : t("Provayder ulanmagan")}
         </button>
       </div>
 
@@ -169,7 +169,7 @@ export default function Topup({ go }: { go: Nav }) {
 
           {info.expires_at && (
             <div className="muted mt-m">
-              Amal qilish muddati:{" "}
+              {t("Amal qilish muddati:")}{" "}
               {new Date(info.expires_at).toLocaleString()}
             </div>
           )}
@@ -191,7 +191,7 @@ export default function Topup({ go }: { go: Nav }) {
 
       <div className="row mt-l mb-m">
         <h3 className="m0">{t("To'lovlar tarixi")}</h3>
-        <span className="muted">{list.length} ta</span>
+        <span className="muted">{list.length} {t("ta")}</span>
       </div>
 
       {list.length === 0 && (
