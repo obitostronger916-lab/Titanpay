@@ -4,6 +4,7 @@ import { Icon } from "../icons";
 import type { Me, Nav } from "../App";
 import { useLanguage } from "../i18n";
 
+import { useLanguage } from "../i18n";
 const KIND_UZ: Record<string, string> = {
   topup: "Balans to'ldirildi",
   purchase: "Xarid",
@@ -13,6 +14,7 @@ const KIND_UZ: Record<string, string> = {
 };
 
 export function Balance({ me }: { me: Me }) {
+  const { t } = useLanguage();
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +52,7 @@ export function Balance({ me }: { me: Me }) {
         <div className="card" key={r.id ?? i}>
           <div className="row">
             <div>
-              <b>{KIND_UZ[r.kind] || r.kind}</b>
+              <b>{t(KIND_UZ[r.kind] || r.kind)}</b>
               <div className="muted mt-s">
                 {new Date(r.created_at).toLocaleString()}
               </div>
@@ -77,6 +79,7 @@ export function Balance({ me }: { me: Me }) {
 }
 
 export function Orders({ go }: { go: Nav }) {
+  const { t } = useLanguage();
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -216,6 +219,7 @@ export function Profile({ me, go }: { me: Me; go: Nav }) {
 }
 
 export function Rules() {
+  const { t } = useLanguage();
   const rules = [
     "To'lov UzCard va Humo orqali amalga oshirilishi ko'zda tutilgan.",
     "To'lovda aynan ko'rsatilgan summani yuboring. Farq bo'lsa, support orqali tekshiruv talab qilinishi mumkin.",
@@ -245,7 +249,7 @@ export function Rules() {
             >
               {i + 1}
             </span>
-            <div style={{ flex: 1, lineHeight: 1.55 }}>{rule}</div>
+            <div style={{ flex: 1, lineHeight: 1.55 }}>{t(rule)}</div>
           </div>
         </div>
       ))}
