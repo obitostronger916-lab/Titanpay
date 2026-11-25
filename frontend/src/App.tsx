@@ -34,7 +34,8 @@ const BOTTOM_NAV: [string, IconName, string][] = [
 
 const SWIPE_MIN = 40;
 
-export default function App() {\n  const { t } = useLanguage();
+export default function App() {
+  const { t } = useLanguage();
   const [me, setMe] = useState<Me | null>(null);
   const [error, setError] = useState("");
   const [page, setPage] = useState("home");
