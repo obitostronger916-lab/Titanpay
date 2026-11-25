@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api, fmt, STATUS_UZ } from "../api";
 import { Icon } from "../icons";
 import type { Me, Nav } from "../App";
+import { useLanguage } from "../i18n";
 
 const KIND_UZ: Record<string, string> = {
   topup: "Balans to'ldirildi",
@@ -141,6 +142,7 @@ export function Orders({ go }: { go: Nav }) {
 }
 
 export function Profile({ me, go }: { me: Me; go: Nav }) {
+  const { language, setLanguage, t } = useLanguage();
   return (
     <>
       <div className="balance-card" style={{ textAlign: "center", padding: 24 }}>
@@ -150,6 +152,15 @@ export function Profile({ me, go }: { me: Me; go: Nav }) {
         <div className="muted">ONESTATE ROLEPLAY</div>
         <div className="big mt-l">{fmt(me.balance)}</div>
         <div className="muted">Mavjud balans · UZS</div>
+      </div>
+
+      <div className="card">
+        <h3>{t("Til / Language")}</h3>
+        <select aria-label={t("Ilova tili")} value={language} onChange={(e) => setLanguage(e.target.value as "uz" | "ru" | "en")}>
+          <option value="uz">🇺🇿 O‘zbekcha</option>
+          <option value="ru">🇷🇺 Русский</option>
+          <option value="en">🇬🇧 English</option>
+        </select>
       </div>
 
       <div className="card">
