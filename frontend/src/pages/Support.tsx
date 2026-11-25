@@ -13,11 +13,11 @@ type Ticket = {
 };
 
 export default function Support({
-  const { t } = useLanguage();
   ctx,
 }: {
   ctx: { payment_id?: string; order_id?: string } | null;
 }) {
+  const { t } = useLanguage();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [text, setText] = useState("");
   const [err, setErr] = useState("");
