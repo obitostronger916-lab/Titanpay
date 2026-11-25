@@ -4,6 +4,7 @@ import { api, fmt } from "../api";
 import { Icon } from "../icons";
 import type { Me, Nav } from "../App";
 
+import { useLanguage } from "../i18n";
 type Product = {
   id: number;
   name: string;
@@ -28,6 +29,7 @@ export default function Shop({
   refresh: () => void;
   go: Nav;
 }) {
+  const { t } = useLanguage();
   const [items, setItems] = useState<Product[]>([]);
   const [cat, setCat] = useState("Hammasi");
   const [sel, setSel] = useState<Product | null>(null);
