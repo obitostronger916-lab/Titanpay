@@ -33,7 +33,7 @@ export function Balance({ me }: { me: Me }) {
 
       <div className="row mt-l mb-m">
         <h3 className="m0">{t("Balans tarixi")}</h3>
-        <span className="muted">{rows.length} ta operatsiya</span>
+        <span className="muted">{rows.length} {t("ta operatsiya")}</span>
       </div>
 
       {loading && <div className="muted">{t("Tarix yuklanmoqda...")}</div>}
@@ -192,17 +192,17 @@ export function Profile({ me, go }: { me: Me; go: Nav }) {
 
       <button className="list-btn" onClick={() => go("balance")}>
         <span className="list-icon"><Icon name="wallet" /></span>
-        <span className="list-text"><strong>{t("Balans tarixi")}</strong><span>Barcha operatsiyalar</span></span>
+        <span className="list-text"><strong>{t("Balans tarixi")}</strong><span>{t("Barcha operatsiyalar")}</span></span>
         <Icon name="chevron" className="list-chev" />
       </button>
       <button className="list-btn" onClick={() => go("support")}>
         <span className="list-icon"><Icon name="support" /></span>
-        <span className="list-text"><strong>Yordam</strong><span>Support bilan aloqa</span></span>
+        <span className="list-text"><strong>{t("Yordam")}</strong><span>{t("Support bilan aloqa")}</span></span>
         <Icon name="chevron" className="list-chev" />
       </button>
       <button className="list-btn" onClick={() => go("rules")}>
         <span className="list-icon"><Icon name="rules" /></span>
-        <span className="list-text"><strong>Qoidalar</strong><span>{t("Foydalanish qoidalari")}</span></span>
+        <span className="list-text"><strong>{t("Qoidalar")}</strong><span>{t("Foydalanish qoidalari")}</span></span>
         <Icon name="chevron" className="list-chev" />
       </button>
       {me.is_admin && (
