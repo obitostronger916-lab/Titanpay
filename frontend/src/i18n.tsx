@@ -179,7 +179,12 @@ const translations: Record<Language, Record<string, string>> = {
     "Character name": "Имя персонажа",
     "O'yindagi personaj nomi": "Имя персонажа в игре",
     "UzCard va Humo orqali to'lov xizmati holati quyida ko'rsatiladi.": "Ниже показан статус оплаты через UzCard и Humo.",
-    "Asosiy navigatsiya": "Основная навигация"
+    "Asosiy navigatsiya": "Основная навигация",
+    "SIZ": "ВЫ",
+    "MUROJAAT": "ОБРАЩЕНИЕ",
+    "To'lov": "Платёж",
+    "Hammasi": "Все",
+    "qabul qilindi": "принят"
 
   },
   en: {
@@ -355,7 +360,12 @@ const translations: Record<Language, Record<string, string>> = {
     "Character name": "Character name",
     "O'yindagi personaj nomi": "In-game character name",
     "UzCard va Humo orqali to'lov xizmati holati quyida ko'rsatiladi.": "The status of payments through UzCard and Humo is shown below.",
-    "Asosiy navigatsiya": "Main navigation"
+    "Asosiy navigatsiya": "Main navigation",
+    "SIZ": "YOU",
+    "MUROJAAT": "REQUEST",
+    "To'lov": "Payment",
+    "Hammasi": "All",
+    "qabul qilindi": "accepted"
 
   }
 };
