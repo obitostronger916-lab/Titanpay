@@ -124,7 +124,7 @@ export default function Shop({
 
       <div className="row mt-l mb-m">
         <h3 className="m0">{t("Paketlar")}</h3>
-        <span className="muted">{items.length} ta mahsulot</span>
+        <span className="muted">{items.length} {t("ta mahsulot")}</span>
       </div>
 
       <div className="chips">
