@@ -77,9 +77,9 @@ export default function Support({
     <>
       <div className="mb-l">
         <div className="eyebrow">TITAN DONAT • ONESTATE RP</div>
-        <h2 className="mt-s mb-s">Yordam markazi</h2>
+        <h2 className="mt-s mb-s">{t("Yordam markazi")}</h2>
         <div className="muted">
-          Savol yoki muammo bo'lsa, admin bilan bog'laning.
+          {t("Savol yoki muammo bo'lsa, admin bilan bog'laning.")}
         </div>
       </div>
 
@@ -87,18 +87,18 @@ export default function Support({
         <div className="row">
           <div>
             <div className="eyebrow">TITAN SUPPORT</div>
-            <h3 className="mt-s mb-s">Biz sizga yordam beramiz</h3>
+            <h3 className="mt-s mb-s">{t("Biz sizga yordam beramiz")}</h3>
           </div>
           <Icon name="support" size={32} />
         </div>
 
         <p className="muted m0">
-          Murojaatingizni yozing. Javob kelganda shu sahifada ko'rishingiz mumkin.
+          {t("Murojaatingizni yozing. Javob kelganda shu sahifada ko'rishingiz mumkin.")}
         </p>
       </div>
 
       <div className="card">
-        <h3>Yangi murojaat</h3>
+        <h3>{t("Yangi murojaat")}</h3>
 
         {ctx?.payment_id && (
           <div className="badge mb-m">
@@ -122,7 +122,7 @@ export default function Support({
         />
 
         <div className="row muted mb-m">
-          <span>Kamida 3 ta belgi</span>
+          <span>{t("Kamida 3 ta belgi")}</span>
           <span>{text.length}/2000</span>
         </div>
 
@@ -138,15 +138,15 @@ export default function Support({
       </div>
 
       <div className="row mt-l mb-m">
-        <h3 className="m0">Murojaatlarim</h3>
+        <h3 className="m0">{t("Murojaatlarim")}</h3>
         <span className="badge">{tickets.length} ta</span>
       </div>
 
       {tickets.length === 0 && (
         <div className="card state">
           <div className="state-icon"><Icon name="message" size={22} /></div>
-          <b>Murojaatlar mavjud emas</b>
-          <p>Yangi murojaat yuborsangiz, shu yerda ko'rinadi.</p>
+          <b>{t("Murojaatlar mavjud emas")}</b>
+          <p>{t("Yangi murojaat yuborsangiz, shu yerda ko'rinadi.")}</p>
         </div>
       )}
 
@@ -192,7 +192,7 @@ export default function Support({
               disabled={!(reply[t.id] || "").trim()}
               onClick={() => send(t.id)}
             >
-              Javob yuborish
+              {t("Javob yuborish")}
             </button>
           </div>
         </div>
