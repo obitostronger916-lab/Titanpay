@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api, STATUS_UZ } from "../api";
 import { Icon } from "../icons";
 
+import { useLanguage } from "../i18n";
 type Ticket = {
   id: string;
   status: string;
@@ -12,6 +13,7 @@ type Ticket = {
 };
 
 export default function Support({
+  const { t } = useLanguage();
   ctx,
 }: {
   ctx: { payment_id?: string; order_id?: string } | null;
