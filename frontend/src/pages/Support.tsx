@@ -155,7 +155,7 @@ export default function Support({
           <div className="row">
             <b>MUROJAAT #{t.id}</b>
             <span className="badge" data-status={t.status}>
-              {STATUS_UZ[t.status] || t.status}
+              {t(STATUS_UZ[t.status] || t.status)}
             </span>
           </div>
 
