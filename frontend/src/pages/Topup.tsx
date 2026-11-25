@@ -3,6 +3,7 @@ import { api, fmt, STATUS_UZ, tg } from "../api";
 import { Icon } from "../icons";
 import type { Nav } from "../App";
 
+import { useLanguage } from "../i18n";
 type Pay = {
   id: string;
   expected: number;
@@ -13,6 +14,7 @@ type Pay = {
 };
 
 export default function Topup({ go }: { go: Nav }) {
+  const { t } = useLanguage();
   const [amount, setAmount] = useState("");
   const [err, setErr] = useState("");
   const [info, setInfo] = useState<any>(null);
