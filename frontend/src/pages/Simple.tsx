@@ -111,7 +111,7 @@ export function Orders({ go }: { go: Nav }) {
           <div className="row">
             <b>Buyurtma #{o.id}</b>
             <span className="badge" data-status={o.status}>
-              {STATUS_UZ[o.status] || o.status}
+              {t(STATUS_UZ[o.status] || o.status)}
             </span>
           </div>
 
