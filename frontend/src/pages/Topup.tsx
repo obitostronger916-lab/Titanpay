@@ -206,7 +206,7 @@ export default function Topup({ go }: { go: Nav }) {
           <div className="row">
             <b>#{p.id}</b>
             <span className="badge" data-status={p.status}>
-              {STATUS_UZ[p.status] || p.status}
+              {t(STATUS_UZ[p.status] || p.status)}
             </span>
           </div>
 
