@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, fmt } from "../api";
 
+import { useLanguage } from "../i18n";
 type Period = "day" | "month" | "year";
 type RatingItem = { rank: number; name: string; amount: number; avatar_url: string | null };
 type RatingResponse = { period: Period; start: string; end: string; items: RatingItem[] };
@@ -20,6 +21,7 @@ function Person({ item, large = false }: { item: RatingItem; large?: boolean }) 
 }
 
 export default function Rating() {
+  const { t } = useLanguage();
   const [period, setPeriod] = useState<Period>("day");
   const [data, setData] = useState<RatingResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,7 +53,7 @@ export default function Rating() {
     <div className="tabs rating-tabs" role="tablist" aria-label="Reyting davri">
       {PERIODS.map((item) => <button key={item.value} type="button" role="tab"
         aria-selected={period === item.value} className={"chip " + (period === item.value ? "on" : "")}
-        onClick={() => setPeriod(item.value)}>{item.label}</button>)}
+        onClick={() => setPeriod(item.value)}>{t(item.label)}</button>)}
     </div>
 
     {loading ? <div className="state"><div className="loading-line"><span /></div><p>Reyting yuklanmoqda…</p></div> : null}
