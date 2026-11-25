@@ -48,7 +48,7 @@ export default function Rating() {
     <div className="rating-intro">
       <span className="eyebrow">ONESTATE RP</span>
       <h2>Top donatchilar</h2>
-      <p>Eng ko‘p tasdiqlangan donat qilgan o‘yinchilar</p>
+      <p>{t("Eng ko‘p tasdiqlangan donat qilgan o‘yinchilar")}</p>
     </div>
     <div className="tabs rating-tabs" role="tablist" aria-label="Reyting davri">
       {PERIODS.map((item) => <button key={item.value} type="button" role="tab"
@@ -56,9 +56,9 @@ export default function Rating() {
         onClick={() => setPeriod(item.value)}>{t(item.label)}</button>)}
     </div>
 
-    {loading ? <div className="state"><div className="loading-line"><span /></div><p>Reyting yuklanmoqda…</p></div> : null}
-    {!loading && error ? <div className="state"><b>Ma’lumot yuklanmadi</b><p>{error}</p></div> : null}
-    {!loading && !error && items.length === 0 ? <div className="state rating-empty"><div className="state-icon">★</div><b>Hozircha reyting bo‘sh</b><p>Ushbu davrda tasdiqlangan donat yo‘q.</p></div> : null}
+    {loading ? <div className="state"><div className="loading-line"><span /></div><p>{t("Reyting yuklanmoqda…")}</p></div> : null}
+    {!loading && error ? <div className="state"><b>{t("Ma’lumot yuklanmadi")}</b><p>{error}</p></div> : null}
+    {!loading && !error && items.length === 0 ? <div className="state rating-empty"><div className="state-icon">★</div><b>{t("Hozircha reyting bo‘sh")}</b><p>{t("Ushbu davrda tasdiqlangan donat yo‘q.")}</p></div> : null}
 
     {!loading && !error && items.length > 0 ? <>
       <div className="podium">
@@ -67,7 +67,7 @@ export default function Rating() {
           <strong>{second.name}</strong><small>{fmt(second.amount)}</small><div className="podium-base">2</div>
         </div>}
         {first && <div className="podium-person first">
-          <div className="crown">1-O‘RIN</div><Person item={first} large /><span className="podium-rank">1</span>
+          <div className="crown">{t("1-O‘RIN")}</div><Person item={first} large /><span className="podium-rank">1</span>
           <strong>{first.name}</strong><small>{fmt(first.amount)}</small><div className="podium-base">1</div>
         </div>}
         {third && <div className="podium-person third">
@@ -81,7 +81,7 @@ export default function Rating() {
           <strong>{item.name}</strong><span className="rating-amount">{fmt(item.amount)}</span>
         </div>)}
       </div>}
-      <p className="rating-note">Reyting faqat balansga muvaffaqiyatli yozilgan to‘lovlar asosida hisoblanadi.</p>
+      <p className="rating-note">{t("Reyting faqat balansga muvaffaqiyatli yozilgan to‘lovlar asosida hisoblanadi.")}</p>
     </> : null}
   </section>;
 }
